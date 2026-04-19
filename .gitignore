@@ -1,0 +1,13 @@
+venv/
+__pycache__/
+*.pyc
+*.db
+*.log
+.env
+*.xlsx
+*.csv
+*.mp4
+*.png
+*.jpg
+*.faiss
+*.pkl

@@ -1,0 +1,2050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>CodePerfect Auditor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Epilogue:ital,wght@1,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="favicon.ico">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:#f4f3ef;--surface:#ffffff;--surface2:#f9f8f5;--border:#e4e2db;--border2:#d4d1c8;
+      --text:#1a1916;--text2:#4a4840;--muted:#8a8780;
+      --accent:#1a472a;--accent-lt:#e8f0eb;--accent2:#2d6a4f;
+      --red:#b91c1c;--red-bg:#fef2f2;--red-bd:#fecaca;
+      --amber:#92400e;--amber-bg:#fffbeb;--amber-bd:#fde68a;
+      --green:#14532d;--green-bg:#f0fdf4;--green-bd:#bbf7d0;
+      --blue:#1e3a5f;--blue-bg:#eff6ff;--blue-bd:#bfdbfe;
+      --purple:#4c1d95;--purple-bg:#faf5ff;--purple-bd:#ddd6fe;
+      --font-head:'Syne',sans-serif;--font-body:'Epilogue',sans-serif;--font-mono:'JetBrains Mono',monospace;
+      --r:8px;--r-lg:14px;--shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);--shadow-md:0 4px 12px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
+    }
+    body.dark-mode {
+      --bg:#171722;--surface:#20202d;--surface2:#23233a;--border:#35335c;--border2:#282847;
+      --text:#e7e8ea;--text2:#cec9e6;--muted:#99a6b8;--accent:#45ed5a;--accent2:#00bb4d;
+    }
+
+    :root {
+  --bg:#f4f3ef;--surface:#ffffff;--surface2:#f9f8f5;--border:#e4e2db;--border2:#d4d1c8;
+  --text:#1a1916;--text2:#4a4840;--muted:#8a8780;
+  --accent:#1a472a;--accent-lt:#e8f0eb;--accent2:#2d6a4f;
+  --red:#b91c1c;--red-bg:#fef2f2;--red-bd:#fecaca;
+  --amber:#92400e;--amber-bg:#fffbeb;--amber-bd:#fde68a;
+  --green:#14532d;--green-bg:#f0fdf4;--green-bd:#bbf7d0;
+  --blue:#1e3a5f;--blue-bg:#eff6ff;--blue-bd:#bfdbfe;
+  --purple:#4c1d95;--purple-bg:#faf5ff;--purple-bd:#ddd6fe;
+  --font-head:'Syne',sans-serif;--font-body:'Epilogue',sans-serif;--font-mono:'JetBrains Mono',monospace;
+  --r:8px;--r-lg:14px;--shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);--shadow-md:0 4px 12px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:14px;line-height:1.6;min-height:100vh}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.shell{display:flex;height:100vh;overflow:hidden}
+
+/* AUTH SCREEN */
+.auth-screen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;align-items:center;justify-content:center}
+.auth-screen.hidden{display:none}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-md);width:100%;max-width:440px;padding:36px 36px 32px}
+.auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.auth-logo-mark{width:40px;height:40px;background:var(--accent);color:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-weight:800;font-size:16px}
+.auth-logo-text{font-family:var(--font-head);font-size:19px;font-weight:700}
+.auth-logo-text span{color:var(--accent2)}
+.auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:24px}
+.auth-tab{flex:1;padding:9px;text-align:center;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:var(--font-body);font-size:13.5px;cursor:pointer;color:var(--muted);transition:.13s}
+.auth-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500}
+.auth-form{display:none !important;flex-direction:column;gap:14px}
+.auth-form.active{display:flex !important}
+#auth-login-form{display:flex !important}
+#auth-login-form.hidden{display:none !important}
+#auth-register-form{display:none !important}
+#auth-register-form.active{display:flex !important}
+.field-group{display:flex;flex-direction:column;gap:5px}
+.field-group label{font-size:12px;font-weight:500;color:var(--text2)}
+.field-group input,.field-group select{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;font-family:var(--font-body);font-size:13.5px;color:var(--text);outline:none;transition:.15s;width:100%}
+.field-group input:focus,.field-group select:focus{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(45,106,79,.1);background:var(--surface)}
+.auth-btn{background:var(--accent);color:#fff;border:none;border-radius:var(--r);padding:11px;font-family:var(--font-body);font-size:14px;font-weight:500;cursor:pointer;transition:.13s;width:100%;margin-top:4px}
+.auth-btn:hover{background:#143d22}
+.auth-btn:disabled{opacity:.5;cursor:not-allowed}
+.auth-hint{font-size:11.5px;color:var(--muted);text-align:center;margin-top:6px;padding:10px;background:var(--surface2);border-radius:var(--r);border:1px solid var(--border)}
+.auth-hint code{font-family:var(--font-mono);font-size:11px;background:var(--border);padding:1px 5px;border-radius:3px}
+.role-select-row{display:flex;gap:8px}
+.role-option{flex:1;border:1px solid var(--border);border-radius:var(--r);padding:10px 8px;text-align:center;cursor:pointer;transition:.13s;background:var(--surface2)}
+.role-option:hover{border-color:var(--accent2);background:var(--accent-lt)}
+.role-option.selected{border-color:var(--accent);background:var(--accent-lt);color:var(--accent)}
+.role-option .role-icon{font-size:20px;margin-bottom:4px}
+.role-option .role-label{font-size:12px;font-weight:500}
+
+/* SIDEBAR */
+.sidebar{width:232px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.logo{padding:20px 20px 18px;border-bottom:1px solid var(--border);display:flex;flex-direction:column}
+.logo-mark{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;background:var(--accent);color:#fff;border-radius:8px;font-family:var(--font-head);font-weight:800;font-size:14px;margin-bottom:10px}
+.logo-name{font-family:var(--font-head);font-size:16px;font-weight:700;letter-spacing:-.3px}
+.logo-name span{color:var(--accent2)}
+.logo-tag{font-size:10.5px;color:var(--muted);margin-top:1px}
+.user-chip{margin-top:10px;padding:7px 10px;background:var(--accent-lt);border-radius:var(--r);display:flex;align-items:center;gap:8px}
+.user-chip-av{width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.user-chip-info{flex:1;min-width:0}
+.user-chip-name{font-size:12px;font-weight:500;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-chip-role{font-size:10px;color:var(--accent2)}
+.logout-btn{display:flex;align-items:center;gap:6px;width:calc(100% - 40px);margin:8px 20px 0;padding:7px 10px;background:none;border:1px solid var(--border);border-radius:var(--r);font-family:var(--font-body);font-size:12px;color:var(--muted);cursor:pointer;transition:.13s;text-align:left}
+.logout-btn:hover{background:var(--red-bg);color:var(--red);border-color:var(--red-bd)}
+.nav-section{padding:14px 12px 8px}
+.nav-label{font-size:9.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:0 8px;margin-bottom:4px}
+.nav-btn{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border:none;background:none;border-radius:var(--r);color:var(--text2);font-family:var(--font-body);font-size:13.5px;cursor:pointer;text-align:left;transition:.13s;margin-bottom:1px}
+.nav-btn svg{opacity:.55;flex-shrink:0}
+.nav-btn:hover{background:var(--surface2);color:var(--text)}
+.nav-btn.active{background:var(--accent-lt);color:var(--accent);font-weight:500}
+.nav-btn.active svg{opacity:1}
+.nav-divider{border:none;border-top:1px solid var(--border);margin:8px 12px}
+.sidebar-foot{margin-top:auto;padding:14px 20px;border-top:1px solid var(--border);display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
+.status-pip{width:7px;height:7px;border-radius:50%;background:#16a34a;flex-shrink:0;box-shadow:0 0 0 2px #dcfce7;animation:breathe 2.5s ease-in-out infinite}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 2px #dcfce7}50%{box-shadow:0 0 0 4px #bbf7d0}}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar-left{display:flex;flex-direction:column}
+.topbar-title{font-family:var(--font-head);font-size:15px;font-weight:700;letter-spacing:-.2px}
+.topbar-sub{font-size:11.5px;color:var(--muted);margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.ver-chip{font-family:var(--font-mono);font-size:10.5px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:3px 9px;border-radius:20px}
+.content{flex:1;overflow-y:auto;padding:24px 28px}
+.page{display:none;animation:fadeUp .22s ease}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow)}
+.card-body{padding:20px}
+.card-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-family:var(--font-head);font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+
+/* FORM */
+label{font-size:12.5px;font-weight:500;color:var(--text2)}
+textarea,input[type=text],input[type=email],input[type=tel],input[type=password],input[type=date]{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--font-body);font-size:13.5px;padding:9px 12px;outline:none;transition:.15s;width:100%}
+textarea{resize:vertical;min-height:140px;line-height:1.55}
+textarea:focus,input:focus{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(45,106,79,.1);background:var(--surface)}
+textarea::placeholder,input::placeholder{color:var(--muted)}
+select{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--font-body);font-size:13px;padding:9px 10px;outline:none;cursor:pointer;transition:.15s;width:100%}
+select:focus{border-color:var(--accent2)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-section-title{font-family:var(--font-head);font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+
+/* FILE UPLOAD */
+.upload-zone{border:2px dashed var(--border2);border-radius:var(--r-lg);padding:28px 20px;text-align:center;cursor:pointer;transition:.2s;background:var(--surface2);position:relative}
+.upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent2);background:var(--accent-lt)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:28px;margin-bottom:10px}
+.upload-title{font-size:14px;font-weight:500;color:var(--text2);margin-bottom:4px}
+.upload-sub{font-size:12px;color:var(--muted)}
+.upload-preview{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-top:10px}
+.upload-preview-icon{font-size:20px}
+.upload-preview-name{font-size:13px;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.upload-preview-size{font-size:11px;color:var(--muted)}
+.upload-preview-remove{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px;transition:.13s}
+.upload-preview-remove:hover{color:var(--red)}
+.file-reading-indicator{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--blue-bg);border:1px solid var(--blue-bd);border-radius:var(--r);margin-top:10px;font-size:13px;color:var(--blue)}
+
+/* BTNS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--r);font-family:var(--font-body);font-size:13.5px;font-weight:500;cursor:pointer;border:none;transition:.13s;white-space:nowrap}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.btn-primary:hover{background:#143d22}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.btn-outline{background:var(--surface);color:var(--text2);border:1px solid var(--border2)}
+.btn-outline:hover{background:var(--surface2);color:var(--text)}
+.btn-ghost{background:none;color:var(--muted);border:1px solid transparent;padding:6px 12px;font-size:13px}
+.btn-ghost:hover{background:var(--surface2);color:var(--text2);border-color:var(--border)}
+.btn-success{background:#16a34a;color:#fff}
+.btn-success:hover{background:#15803d}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{background:#991b1b}
+.btn-sm{padding:6px 12px;font-size:12.5px}
+.spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* CODE ENTRY */
+.code-entry-list{display:flex;flex-direction:column;gap:8px}
+.code-entry-row{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:8px 10px}
+.code-type-badge{font-family:var(--font-mono);font-size:10px;font-weight:500;padding:2px 6px;border-radius:4px;flex-shrink:0}
+.badge-icd{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-bd)}
+.badge-cpt{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-bd)}
+.code-entry-row input{background:none;border:none;padding:0;font-size:13px;box-shadow:none;width:auto}
+.code-entry-row input:focus{box-shadow:none;border:none}
+.code-val{font-family:var(--font-mono);font-size:12.5px;min-width:80px;max-width:100px;font-weight:500}
+.code-desc{flex:1;font-size:13px;color:var(--text2)}
+.remove-code{background:none;border:none;color:var(--muted);cursor:pointer;padding:2px 5px;border-radius:4px;font-size:14px;transition:.13s;flex-shrink:0}
+.remove-code:hover{color:var(--red);background:var(--red-bg)}
+.add-code-row{display:flex;gap:8px;margin-top:10px;align-items:center}
+.add-code-row select{width:90px;flex-shrink:0;padding:8px;font-size:12.5px}
+
+/* ANALYZE LAYOUT */
+.analyze-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+
+/* SUMMARY */
+.summary-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.sum-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 18px;box-shadow:var(--shadow)}
+.sum-val{font-family:var(--font-head);font-size:34px;font-weight:800;line-height:1;letter-spacing:-1px}
+.sum-lbl{font-size:11px;color:var(--muted);margin-top:4px;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.sum-sub{font-size:11.5px;margin-top:6px}
+
+/* TABS */
+.tab-bar{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:16px;overflow-x:auto}
+.tab-btn{padding:9px 16px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:var(--font-body);font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap;transition:.13s}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500}
+.tab-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:9px;font-size:10.5px;font-weight:600;padding:0 5px;margin-left:5px;background:var(--surface2);color:var(--muted)}
+.tab-btn.active .tab-count{background:var(--accent-lt);color:var(--accent)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* RESULT ROWS */
+.result-list{display:flex;flex-direction:column;gap:6px}
+.result-row{display:flex;align-items:flex-start;gap:12px;padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);border-left:3px solid transparent;transition:.13s}
+.result-row:hover{border-color:var(--border2)}
+.result-row.matched{border-left-color:#16a34a}
+.result-row.missing{border-left-color:var(--red);background:var(--red-bg);border-color:var(--red-bd)}
+.result-row.extra{border-left-color:#d97706;background:var(--amber-bg);border-color:var(--amber-bd)}
+.result-row.ai{border-left-color:#2563eb}
+.r-code{font-family:var(--font-mono);font-size:12px;font-weight:500;color:var(--accent2);min-width:68px;flex-shrink:0;padding-top:1px}
+.result-row.missing .r-code{color:var(--red)}
+.result-row.extra .r-code{color:var(--amber)}
+.r-desc{flex:1;font-size:13px;color:var(--text)}
+.r-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.r-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
+.conf-bar-wrap{width:60px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.conf-bar{height:100%;border-radius:2px;background:var(--accent2)}
+.conf-val{font-family:var(--font-mono);font-size:10.5px;color:var(--muted)}
+
+/* RISK BADGE */
+.risk-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px}
+.risk-high{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)}
+.risk-medium{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bd)}
+.risk-low{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
+.risk-clear{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
+.risk-unknown,.risk-no_audit{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+
+/* CLAIM STATUS PILLS */
+.cs-pending{background:#f1f5f9;color:#475569;border:1px solid #cbd5e1}
+.cs-accepted{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
+.cs-rejected{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)}
+.cs-issued{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-bd)}
+.cs-requires_verification{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bd)}
+.status-pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:500;background:var(--surface2);border:1px solid var(--border);color:var(--muted)}
+.status-approved{background:var(--green-bg);color:var(--green);border-color:var(--green-bd)}
+.status-disputed{background:var(--red-bg);color:var(--red);border-color:var(--red-bd)}
+.status-reviewed{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-bd)}
+
+/* TAGS */
+.tag-cloud{display:flex;flex-wrap:wrap;gap:6px}
+.tag{padding:3px 10px;border-radius:20px;font-size:12px;background:var(--surface2);border:1px solid var(--border);color:var(--text2)}
+.tag-green{background:var(--green-bg);color:var(--green);border-color:var(--green-bd)}
+.tag-red{background:var(--red-bg);color:var(--red);border-color:var(--red-bd)}
+.tag-blue{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-bd)}
+
+/* RECS */
+.rec-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.rec-list li{display:flex;gap:10px;font-size:13.5px;padding:10px 14px;background:var(--surface2);border-radius:var(--r);border:1px solid var(--border)}
+.rec-arrow{color:var(--accent2);font-weight:700;flex-shrink:0}
+
+/* WARN */
+.warn-banner{display:flex;gap:10px;padding:10px 14px;background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:var(--r);font-size:13px;color:var(--amber);margin-bottom:12px}
+
+/* EMPTY */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:52px 20px;color:var(--muted);text-align:center}
+.empty-icon{width:48px;height:48px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:22px}
+.empty-title{font-family:var(--font-head);font-size:16px;color:var(--text2);margin-bottom:5px;font-weight:600}
+.empty-sub{font-size:13px}
+
+/* LOG TABLE */
+.log-table{width:100%;border-collapse:collapse}
+.log-table th{text-align:left;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;padding:10px 14px;border-bottom:1px solid var(--border);white-space:nowrap}
+.log-table td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+.log-table tr:last-child td{border-bottom:none}
+.log-table tbody tr{transition:background .1s;cursor:pointer}
+.log-table tbody tr:hover td{background:var(--surface2)}
+.mono-sm{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+
+/* CLAIMS TABLE */
+.claims-table{width:100%;border-collapse:collapse}
+.claims-table th{text-align:left;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;padding:10px 14px;border-bottom:1px solid var(--border);white-space:nowrap}
+.claims-table td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+.claims-table tr:last-child td{border-bottom:none}
+.claims-table tbody tr:hover td{background:var(--surface2)}
+
+/* STATUS UPDATE POPOVER */
+.status-update-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.status-update-row select{padding:5px 8px;font-size:12px;width:auto}
+.status-update-row input{padding:5px 8px;font-size:12px;width:160px}
+.status-update-row .btn{padding:5px 10px;font-size:12px}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;box-shadow:var(--shadow)}
+.stat-card-val{font-family:var(--font-head);font-size:40px;font-weight:800;line-height:1;letter-spacing:-2px}
+.stat-card-lbl{font-size:11.5px;color:var(--muted);margin-top:5px;font-weight:500}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(15,15,13,.5);backdrop-filter:blur(2px);z-index:200;display:none;align-items:center;justify-content:center;padding:24px}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);width:100%;max-width:720px;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-md);animation:modalIn .2s ease}
+@keyframes modalIn{from{opacity:0;transform:scale(.97) translateY(8px)}to{opacity:1;transform:none}}
+.modal-head{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;position:sticky;top:0;background:var(--surface);z-index:1}
+.modal-body{padding:20px 24px 24px}
+
+/* PATIENT / INSURER PANEL */
+.details-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;margin-bottom:20px}
+.details-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;box-shadow:var(--shadow)}
+.details-panel-title{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+
+/* SEND REPORT BAR */
+.send-report-bar{background:var(--surface);border:1px solid var(--accent-lt);border-radius:var(--r-lg);padding:20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 2px 8px rgba(26,71,42,.08)}
+.send-targets{display:flex;gap:16px;flex:1;flex-wrap:wrap}
+.send-target{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2)}
+.send-target input[type=checkbox]{width:14px;height:14px;cursor:pointer;accent-color:var(--accent)}
+.send-actions{display:flex;gap:8px;flex-shrink:0}
+
+/* SECTION LABEL */
+.section-lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;margin-top:18px}
+.section-lbl:first-child{margin-top:0}
+hr.divider{border:none;border-top:1px solid var(--border);margin:18px 0}
+.audit-id-row{display:flex;align-items:center;gap:8px;margin-top:8px;padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+.filter-bar{display:flex;gap:8px;margin-bottom:18px;align-items:center;flex-wrap:wrap}
+
+/* INFO BOX */
+.info-box{padding:12px 16px;background:var(--blue-bg);border:1px solid var(--blue-bd);border-radius:var(--r);font-size:13px;color:var(--blue);display:flex;gap:10px;align-items:flex-start}
+.success-box{background:var(--green-bg);border-color:var(--green-bd);color:var(--green)}
+
+/* TOAST */
+.toast-container{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--text);color:#fff;padding:12px 18px;border-radius:var(--r);font-size:13px;box-shadow:var(--shadow-md);animation:toastIn .25s ease;display:flex;align-items:center;gap:10px;max-width:340px}
+.toast.success{background:#15803d}
+.toast.error{background:var(--red)}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+@media(max-width:1100px){.analyze-grid{grid-template-columns:1fr}.details-grid{grid-template-columns:1fr}.summary-strip{grid-template-columns:repeat(2,1fr)}.stats-grid{grid-template-columns:repeat(2,1fr)}.form-row{grid-template-columns:1fr}.form-row-3{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.sidebar{display:none}.stats-grid{grid-template-columns:1fr}}
+
+    /* ... CSS unchanged from your initial version for all your main classes ... */
+    /* ... for brevity, retain your entire CSS block, no loss of look/feel ... */
+    /* Insert ALL your initial CSS here exactly as in your previous ui.html ... */
+  </style>
+</head>
+<body>
+
+
+
+<!-- AUTH SCREEN (unchanged, paste your initial HTML login/register here) -->
+<div class="auth-screen" id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-mark">CP</div>
+      <div>
+        <div class="auth-logo-text">Code<span>Perfect</span></div>
+        <div style="font-size:11px;color:var(--muted)">Medical Coding Auditor · v7.0</div>
+      </div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Create Account</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="auth-login-form" class="auth-form active">
+      <div class="field-group">
+        <!-- <label>Role</label> -->
+        <!-- <div class="role-select-row">
+          <div class="role-option selected" id="login-role-hospital" onclick="selectLoginRole('hospital')">
+            <div class="role-icon">🏥</div>
+            <div class="role-label">Hospital</div>
+          </div>
+          <div class="role-option" id="login-role-insurer" onclick="selectLoginRole('insurer')">
+            <div class="role-icon">🛡️</div>
+            <div class="role-label">Insurer</div>
+          </div>
+            <div class="role-option" id="login-role-admin" onclick="selectLoginRole('admin')">
+            <div class="role-icon">⚙️</div>
+            <div class="role-label">Admin</div>
+          </div> -->
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Username</label>
+        <input type="text" id="login-username" placeholder="hospital1 / insurer1" autocomplete="username">
+      </div>
+      <div class="field-group">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="auth-btn" id="login-btn" onclick="doLogin()">Sign In</button>
+      <div class="auth-hint">
+        Demo credentials:<br>
+        <code>hospital1</code> / <code>hospital123</code> &nbsp;·&nbsp;
+        <code>insurer1</code> / <code>insurer123</code> &nbsp;·&nbsp;
+        <!-- <code>admin</code> / <code>admin123</code> -->
+      </div>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="auth-register-form" class="auth-form">
+      <div class="field-group">
+        <label>Role</label>
+        <div class="role-select-row">
+          <div class="role-option selected" id="reg-role-hospital" onclick="selectRegRole('hospital')">
+            <div class="role-icon">🏥</div>
+            <div class="role-label">Hospital</div>
+          </div>
+          <div class="role-option" id="reg-role-insurer" onclick="selectRegRole('insurer')">
+            <div class="role-icon">🛡️</div>
+            <div class="role-label">Insurer</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-row" style="gap:10px">
+        <div class="field-group">
+          <label>First Name</label>
+          <input type="text" id="reg-first" placeholder="Priya">
+        </div>
+        <div class="field-group">
+          <label>Last Name</label>
+          <input type="text" id="reg-last" placeholder="Sharma">
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Username</label>
+        <input type="text" id="reg-username" placeholder="priya.sharma">
+      </div>
+      <div class="field-group">
+        <label>Organization</label>
+        <input type="text" id="reg-org" placeholder="Apollo Hospitals / Star Health">
+      </div>
+      <div class="field-group">
+        <label>Work Email</label>
+        <input type="email" id="reg-email" placeholder="you@organization.com">
+      </div>
+      <div class="field-group">
+        <label>Password</label>
+        <input type="password" id="reg-password" placeholder="Create a password">
+      </div>
+      <button class="auth-btn" id="reg-btn" onclick="doRegister()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- TOASTS -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- SHELL/Sidebar Menu -->
+<div class="shell" id="app-shell" style="display:none">
+  <aside class="sidebar">
+      <div class="logo">
+    <div class="logo-mark">CP</div>
+    <div class="logo-name">Code<span>Perfect</span></div>
+    <div class="logo-tag">Medical Coding Auditor</div>
+    <div class="user-chip" id="user-chip">
+      <div class="user-chip-av" id="user-avatar">CP</div>
+      <div class="user-chip-info">
+        <div class="user-chip-name" id="user-display-name">Loading…</div>
+        <div class="user-chip-role" id="user-display-role">—</div>
+      </div>
+    </div>
+  </div>
+    <!-- ...your unchanged sidebar markup, but: -->
+    <!-- Add "Dashboard" and "Codebook" and "Profile/Settings" -->
+    <div class="nav-section"> 
+      <div class="nav-label">Workspace</div>
+      <button class="nav-btn active" id="nav-dashboard" onclick="showPage('dashboard')">🏠 Dashboard</button>
+      <button class="nav-btn" id="nav-analyze" onclick="showPage('analyze')">📝 Analyze Note</button>
+      <button class="nav-btn" id="nav-claims" onclick="showPage('claims')">📦 My Claims</button>
+      <button class="nav-btn" id="nav-logs" onclick="showPage('logs')">📋 Audit Logs</button>
+      <button class="nav-btn" id="nav-stats" onclick="showPage('stats')">📈 Statistics</button>
+    </div>
+    <hr class="nav-divider">
+    <div class="nav-section">
+      <div class="nav-label">Tools</div>
+      <button class="nav-btn" id="nav-icdsearch" onclick="showPage('icdsearch')">🔎 ICD-10 Search</button>
+      <button class="nav-btn" id="nav-cptlookup" onclick="showPage('cptlookup')">💉 CPT Lookup</button>
+    </div>
+    <hr class="nav-divider">
+
+    <button class="logout-btn" onclick="doLogout()">🚪 Sign Out</button>
+    <div class="sidebar-foot"><div class="status-pip"></div><span>API · v8.0.0</span></div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title" id="page-title">Dashboard</div>
+        <div class="topbar-sub" id="page-sub">Your audit workspace overview</div>
+      </div>
+      <div class="topbar-right">
+        <span class="ver-chip">127.0.0.1:8000</span>
+        <button class="btn btn-ghost btn-sm" onclick="document.body.classList.toggle('dark-mode')" title="Toggle dark mode">🌗</button>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- DASHBOARD PAGE -->
+      <div class="page active" id="page-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card" id="stat-audits"><div class="stat-card-val">0</div><div class="stat-card-lbl">Audits Run</div></div>
+          <div class="stat-card" id="stat-claims"><div class="stat-card-val">0</div><div class="stat-card-lbl">Claims</div></div>
+          <div class="stat-card" id="stat-risk"><div class="stat-card-val" style="color:var(--red)">0</div><div class="stat-card-lbl">High Risk</div></div>
+        </div>
+        <div class="card" style="padding:16px 14px">
+          <canvas id="trendChart" height="80"></canvas>
+        </div>
+        <div class="card" style="margin-top:12px;padding:14px 18px;font-size:13px;background:var(--surface2)">
+          <strong>🚀 Welcome!</strong> Stay up to date with the latest coding and audit policy news below.<br>
+          <span id="dashboard-announcement"></span>
+        </div>
+      </div>
+
+      <!-- ANALYZE, CLAIMS, LOGS, STATS, ICDSEARCH, CPTLOOKUP: paste your initial blocks for each -->
+      <!-- No markup deleted! -->
+      
+    <!-- ══════════ PAGE: ANALYZE (Hospital) ══════════ -->
+    <div class="page active" id="page-analyze">
+
+      <div class="analyze-grid">
+        <!-- LEFT: INPUT -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+
+          <!-- File Upload -->
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title">Upload Document</span>
+              <span style="font-size:11.5px;color:var(--muted)">PDF · Word · Image</span>
+            </div>
+            <div class="card-body">
+              <div class="upload-zone" id="upload-zone" ondrop="handleDrop(event)" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')">
+                <input type="file" id="file-input" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.webp,.tiff,.bmp" onchange="handleFileSelect(event)">
+                <div class="upload-icon">📄</div>
+                <div class="upload-title">Drop file here or click to browse</div>
+                <div class="upload-sub">Supports PDF, Word (.docx), and images (PNG, JPG)</div>
+              </div>
+              <div id="file-preview-area"></div>
+            </div>
+          </div>
+
+          <!-- Clinical Note -->
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title">Clinical Note / Doctor Prescription</span>
+              <span id="ner-method-badge" style="font-size:11px;color:var(--muted)"></span>
+            </div>
+            <div class="card-body">
+              <textarea id="note-input" placeholder="Paste the doctor's clinical note here, or upload a file above to auto-extract…&#10;&#10;Example: Patient is a 67-year-old male with SOB and chest pain. History of HTN and DM2. CT scan and CBC ordered. IV infusion of antibiotics started for CAP. No evidence of PE."></textarea>
+            </div>
+          </div>
+
+          <!-- Human Codes -->
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title">Human Coder's Codes</span>
+              <span style="font-size:11.5px;color:var(--muted)">optional</span>
+            </div>
+            <div class="card-body">
+              <div class="code-entry-list" id="code-entry-list"></div>
+              <div class="add-code-row" style="margin-top:12px">
+                <select id="new-code-type" style="width:90px"><option>ICD-10</option><option>CPT</option></select>
+                <input type="text" id="new-code-val" placeholder="e.g. J18.9" onkeydown="if(event.key==='Enter')addCode()" style="max-width:110px">
+                <input type="text" id="new-code-desc" placeholder="Description (optional)" onkeydown="if(event.key==='Enter')addCode()" style="flex:1">
+                <button class="btn btn-outline btn-sm" onclick="addCode()">+ Add</button>
+              </div>
+              <div style="margin-top:10px;font-size:12px;color:var(--muted)">Leave empty to run AI coding without audit comparison.</div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" id="run-btn" onclick="runAnalysis()" style="flex:1;justify-content:center;padding:11px 18px">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              Run Analysis
+              <div class="spinner" id="spinner"></div>
+            </button>
+            <button class="btn btn-outline" onclick="loadExample()">Load example</button>
+            <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
+          </div>
+        </div>
+
+        <!-- RIGHT: RESULTS -->
+        <div id="results-pane">
+          <div class="card">
+            <div class="empty-state">
+              <div class="empty-icon">⚕</div>
+              <div class="empty-title">No analysis yet</div>
+              <div class="empty-sub">Enter a clinical note and click Run Analysis</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Patient & Insurer Details (always visible) ── -->
+      <div id="patient-insurer-section" style="display:block">
+        <hr class="divider" style="margin-top:24px">
+        <div style="font-family:var(--font-head);font-size:14px;font-weight:700;margin-bottom:4px;margin-top:4px">
+          📋 Patient &amp; Insurer Details
+        </div>
+        <div style="font-size:12.5px;color:var(--muted);margin-bottom:0">
+          Fill in details below to save the patient record and send the audit report.
+        </div>
+
+        <div class="details-grid">
+          <!-- Patient Panel -->
+          <div class="details-panel">
+            <div class="details-panel-title">
+              <span>🧑‍⚕️</span> Patient Details
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Full Name *</label>
+                  <input type="text" id="pat-name" placeholder="Enter Patient Name">
+                </div>
+                <div class="form-group">
+                  <label>Phone Number</label>
+                  <input type="tel" id="pat-phone" placeholder="Enter Phone Number">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Email Address</label>
+                  <input type="email" id="pat-email" placeholder="patient@email.com">
+                </div>
+                <div class="form-group">
+                  <label>Insurance Code</label>
+                  <input type="text" id="pat-insurance" placeholder="INS-2024-XXXXX">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Date of Birth</label>
+                  <input type="text" id="pat-dob" placeholder="DD/MM/YYYY">
+                </div>
+                <div class="form-group">
+                  <label>Gender</label>
+                  <select id="pat-gender">
+                    <option value="">Select…</option>
+                    <option>Male</option>
+                    <option>Female</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Address</label>
+                <input type="text" id="pat-address" placeholder="Enter Patient Address">
+              </div>
+            </div>
+          </div>
+
+          <!-- Insurer Panel -->
+          <div class="details-panel">
+            <div class="details-panel-title">
+              <span>🛡️</span> Insurer &amp; Facility Details
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div class="form-group">
+                <label>Insurance Organization *</label>
+                <input type="text" id="ins-org" placeholder="Enter Insurance Company Name">
+              </div>
+              <div class="form-group">
+                <label>Claims Contact Email *</label>
+                <input type="email" id="ins-email" placeholder="claims@starhealth.in">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Policy / Insurance Code</label>
+                  <input type="text" id="ins-policy" placeholder="POL-2024-XXXXX">
+                </div>
+                <div class="form-group">
+                  <label>Adjuster Name</label>
+                  <input type="text" id="ins-adjuster" placeholder="Enter Adjuster Name">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Hospital / Facility Name</label>
+                <input type="text" id="hosp-name" placeholder="Enter Hospital / Facility Name">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Send Report Bar -->
+        <div class="send-report-bar" id="send-report-bar">
+          <div>
+            <div style="font-family:var(--font-head);font-size:14px;font-weight:700;margin-bottom:4px">📤 Send Audit Report</div>
+            <div style="font-size:12px;color:var(--muted)">Raise insurance claim &amp; dispatch the full report to recipients via the API</div>
+          </div>
+          <div class="send-targets">
+            <label class="send-target">
+              <input type="checkbox" id="send-to-patient" checked>
+              <span>Patient (<span id="send-patient-email-display">—</span>)</span>
+            </label>
+            <label class="send-target">
+              <input type="checkbox" id="send-to-insurer" checked>
+              <span>Insurer (<span id="send-insurer-email-display">—</span>)</span>
+            </label>
+          </div>
+          <div class="send-actions">
+            <button class="btn btn-outline btn-sm" onclick="downloadReportPDF()">
+              <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              Download PDF
+            </button>
+            <button class="btn btn-success btn-sm" id="send-btn" onclick="savePatientAndSendReport()">
+              <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              Send Report &amp; Raise Claim
+              <div class="spinner" id="send-spinner"></div>
+            </button>
+          </div>
+        </div>
+
+        <div id="claim-result-box" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- ══════════ PAGE: CLAIMS (Insurer) ══════════ -->
+    <div class="page" id="page-claims">
+      <div class="filter-bar">
+        <select id="claim-status-filter" onchange="loadClaims()">
+          <option value="">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="requires_verification">Requires Verification</option>
+          <option value="issued">Issued</option>
+          <option value="accepted">Accepted</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="loadClaims()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          Refresh
+        </button>
+      </div>
+      <div class="card" style="overflow-x:auto">
+        <table class="claims-table">
+          <thead>
+            <tr>
+              <th>Claim ID</th><th>Date</th><th>Patient</th><th>Hospital</th>
+              <th>ICD Codes</th><th>Risk</th><th>At Risk</th>
+              <th>Status</th><th>Update</th><th>Report</th>
+            </tr>
+          </thead>
+          <tbody id="claims-tbody">
+            <tr><td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════ PAGE: AUDIT LOGS ══════════ -->
+    <div class="page" id="page-logs">
+      <div class="filter-bar">
+        <select id="risk-filter" onchange="loadLogs()">
+          <option value="">All risk levels</option>
+          <option value="high">High risk</option>
+          <option value="medium">Medium risk</option>
+          <option value="low">Low risk</option>
+          <option value="clear">Clear</option>
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="loadLogs()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          Refresh
+        </button>
+      </div>
+      <div class="card" style="overflow:hidden;overflow-x:auto">
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th>Audit ID</th><th>Date &amp; Time</th><th>Patient</th><th>Risk</th>
+              <th>Matched</th><th>Missing</th><th>Extra</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="log-tbody">
+            <tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted)">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════ PAGE: STATISTICS ══════════ -->
+    <div class="page" id="page-stats">
+      <div id="stats-pane"><div class="empty-state"><div class="empty-sub">Loading statistics…</div></div></div>
+    </div>
+
+    <!-- ══════════ PAGE: ICD SEARCH ══════════ -->
+    <div class="page" id="page-icdsearch">
+      <div class="card" style="max-width:640px">
+        <div class="card-head"><span class="card-title">ICD-10 Semantic Search</span></div>
+        <div class="card-body">
+          <label>Clinical phrase or diagnosis term</label>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <input type="text" id="icd-query" placeholder="e.g. type 2 diabetes with kidney complications" style="flex:1" onkeydown="if(event.key==='Enter')searchICD()">
+            <button class="btn btn-primary" onclick="searchICD()">Search</button>
+          </div>
+          <div id="icd-results" style="margin-top:16px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ PAGE: CPT LOOKUP ══════════ -->
+    <div class="page" id="page-cptlookup">
+      <div class="card" style="max-width:640px">
+        <div class="card-head"><span class="card-title">CPT Code Lookup</span></div>
+        <div class="card-body">
+          <label>Procedure name</label>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <input type="text" id="cpt-query" placeholder="e.g. CT scan of chest" style="flex:1" onkeydown="if(event.key==='Enter')lookupCPT()">
+            <button class="btn btn-primary" onclick="lookupCPT()">Look up</button>
+          </div>
+          <div id="cpt-results" style="margin-top:16px"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+</div><!-- /shell -->
+
+<!-- AUDIT DETAIL MODAL -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div style="font-family:var(--font-head);font-size:17px;font-weight:700" id="modal-title">Audit Detail</div>
+        <div id="modal-sub" style="font-size:12px;color:var(--muted);margin-top:3px"></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">✕ Close</button>
+    </div>
+    <div class="modal-body" id="modal-body">Loading…</div>
+  </div>
+</div>
+
+
+
+
+
+<!-- ...Modals, toast JS, main script, autocomplete, enhanced result render function, exactly as in your previous version but now extended... -->
+
+<script>
+const API = 'http://127.0.0.1:8000';
+let currentUser = null;
+let authToken   = null;
+let loginRole   = 'hospital';
+let regRole     = 'hospital';
+let lastAnalysisResult = null;
+
+// Chart/Dashboard logic
+window.addEventListener('DOMContentLoaded',function(){
+  let ctx=document.getElementById('trendChart');if(ctx){
+    new Chart(ctx.getContext('2d'),{
+      type:"line",
+      data: {
+        labels:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],
+        datasets:[{
+          label:"Audits per day", data:[2,6,4,7,5,9,3],
+          borderColor:"#2d6a4f", backgroundColor:"rgba(45,106,79,0.12)"
+        }]
+      },
+      options: { plugins:{legend:{display:false}},scales:{y:{beginAtZero:true},x:{}} }
+    });
+    // These could be fetched from API
+    document.getElementById('stat-audits').children[0].textContent=98;
+    document.getElementById('stat-claims').children[0].textContent=12;
+    document.getElementById('stat-risk').children[0].textContent=3;
+    document.getElementById('dashboard-announcement').textContent = "ICD-10 2025 updates deployed. Payer guideline RAG now live!";
+  }
+});
+
+
+
+
+
+// Allow copy summary of dashboard or any audit
+function copySummary(){navigator.clipboard.writeText("Summary copied! (implement or customize)").then(()=>showToast('Summary copied','success'));}
+
+// ICD/CPT code autocomplete for code entry
+document.getElementById('new-code-val')?.addEventListener('input', async function(e){
+  let val=this.value.trim(),type=document.getElementById('new-code-type').value,box=document.getElementById('autocomplete-popup')||document.createElement("div");
+  if(!box.id){box.id="autocomplete-popup";document.body.append(box);}
+  if(val.length<2){ box.style.display='none'; return; }
+  let out='';
+  let endpoint=type==='ICD-10'?'/codes/icd':'/codes/cpt';
+  let resp=await fetch(`${API}${endpoint}`,{method:'POST',headers:authHeaders(),body:type==='ICD-10'?JSON.stringify({query:val,top_k:5}):JSON.stringify({procedure:val})});
+  let data=await resp.json();
+  if(type==='ICD-10'&&data.results) out=data.results.map(c=>`<div class="autocomplete-item" onclick="selectAutoCode('${c.icd_code}','${c.description.replaceAll("'","&#39;")}')">${c.icd_code} — ${c.description}</div>`).join('');
+  else if(type==='CPT'&&data.result&&data.result.cpt_code!=='UNKNOWN') out=`<div class="autocomplete-item" onclick="selectAutoCode('${data.result.cpt_code}','${(data.result.description||'').replaceAll("'","&#39;")}')">${data.result.cpt_code} — ${data.result.description}</div>`;
+  box.innerHTML=out;
+  const rect=this.getBoundingClientRect();
+  box.style.position="absolute"; box.style.top=(rect.bottom+window.scrollY+3)+"px"; box.style.left=(rect.left+window.scrollX)+"px"; box.style.zIndex=1010;
+  box.style.display=out?'block':'none';box.style.background='#fff';box.style.border='1px solid var(--accent)';box.style.borderRadius='5px';box.style.maxHeight='180px';box.style.overflowY='auto';
+});
+window.selectAutoCode=function(code,desc){
+  document.getElementById('new-code-val').value=code;
+  document.getElementById('new-code-desc').value=desc||"";
+  let box=document.getElementById('autocomplete-popup'); if(box) box.style.display='none';
+};
+document.body.onclick=function(e){if(!e.target.classList.contains('autocomplete-item')){let box=document.getElementById('autocomplete-popup'); if(box) box.style.display='none';}};
+
+// All other JS unchanged—keep your core backend integrations and render functions, just as before.
+// ── AUTH HEADER ──────────────────────────────────────────────────────────────
+function authHeaders(extra={}) {
+  return { 'Content-Type':'application/json', ...(authToken ? {Authorization:'Bearer '+authToken} : {}), ...extra };
+}
+
+// ── AUTH TAB SWITCH ───────────────────────────────────────────────────────────
+function switchAuthTab(tab) {
+  const loginForm = document.getElementById('auth-login-form');
+  const registerForm = document.getElementById('auth-register-form');
+  const loginTab = document.querySelectorAll('.auth-tab')[0];
+  const registerTab = document.querySelectorAll('.auth-tab')[1];
+  
+  // Remove active class from all forms first
+  loginForm.classList.remove('active', 'hidden');
+  registerForm.classList.remove('active', 'hidden');
+  loginTab.classList.remove('active');
+  registerTab.classList.remove('active');
+  
+  // Then add active class to the selected one
+  if (tab === 'login') {
+    loginForm.classList.add('active');
+    loginTab.classList.add('active');
+    registerForm.style.display = 'none !important';
+  } else if (tab === 'register') {
+    registerForm.classList.add('active');
+    registerTab.classList.add('active');
+    loginForm.style.display = 'none !important';
+  }
+}
+
+function selectLoginRole(role) {
+  loginRole = role;
+  ['hospital','insurer'].forEach(r =>
+    document.getElementById('login-role-'+r)?.classList.toggle('selected', r===role)
+  );
+}
+
+function selectRegRole(role) {
+  regRole = role;
+  ['hospital','insurer'].forEach(r =>
+    document.getElementById('reg-role-'+r)?.classList.toggle('selected', r===role)
+  );
+}
+
+// ── LOGIN ────────────────────────────────────────────────────────────────────
+async function doLogin() {
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!username || !password) { showToast('Please enter username and password', 'error'); return; }
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    const res = await fetch(`${API}/auth/login`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Login failed');
+    authToken   = data.token;
+    currentUser = data;
+    enterApp();
+  } catch(e) {
+    showToast(e.message || 'Login failed — check credentials', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Sign In';
+  }
+}
+
+// ── REGISTER ─────────────────────────────────────────────────────────────────
+async function doRegister() {
+  const first    = document.getElementById('reg-first').value.trim();
+  const last     = document.getElementById('reg-last').value.trim();
+  const username = document.getElementById('reg-username').value.trim();
+  const org      = document.getElementById('reg-org').value.trim();
+  const email    = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  if (!first||!last||!username||!org||!email||!password) { showToast('Please fill in all fields', 'error'); return; }
+  const btn = document.getElementById('reg-btn');
+  btn.disabled = true; btn.textContent = 'Creating…';
+  try {
+    const payload = { 
+      username, 
+      password, 
+      role:regRole, 
+      full_name:`${first} ${last}`, 
+      organization:org, 
+      email 
+    };
+    console.log('[Register] Sending payload:', payload);
+    
+    const res = await fetch(`${API}/auth/register`, {
+      method:'POST', 
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    console.log('[Register] Response:', res.status, data);
+    
+    if (!res.ok) throw new Error(data.detail || 'Registration failed');
+    showToast('Account created! You can now sign in.', 'success');
+    switchAuthTab('login');
+    document.getElementById('login-username').value = username;
+  } catch(e) {
+    console.error('[Register Error]', e);
+    showToast(e.message || 'Registration failed', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Create Account';
+  }
+}
+
+// ── ENTER APP ─────────────────────────────────────────────────────────────────
+function enterApp() {
+  document.getElementById('auth-screen').classList.add('hidden');
+  document.getElementById('app-shell').style.display = 'flex';
+  const role = currentUser.role;
+  const name = currentUser.full_name || currentUser.username || '—';
+  const av = name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('user-avatar').textContent = av;
+  document.getElementById('user-display-name').textContent = name;
+  document.getElementById('user-display-role').textContent =
+    role==='hospital' ? '🏥 Hospital' : role==='insurer' ? '🛡️ Insurer' : '';
+
+  // Role-based nav visibility
+  const isHospital = role === 'hospital' || role === '';
+  const isInsurer  = role === 'insurer'  || role === '';
+  document.getElementById('nav-analyze').style.display = isHospital ? 'flex' : 'none';
+  document.getElementById('nav-claims').style.display  = isInsurer  ? 'flex' : 'none';
+  document.getElementById('nav-logs').style.display = isHospital ? 'flex' : 'none';
+  document.getElementById('nav-stats').style.display = isHospital ? 'flex' : 'none';
+
+  if (isInsurer && !isHospital) {
+    // Insurer land on claims page
+    showPage('claims');
+  } else {
+    showPage('analyze');
+  }
+  showToast(`Welcome, ${name.split(' ')[0]}!`, 'success');
+}
+
+// ── LOGOUT ────────────────────────────────────────────────────────────────────
+function doLogout() {
+  authToken = null; currentUser = null; lastAnalysisResult = null;
+  document.getElementById('auth-screen').classList.remove('hidden');
+  document.getElementById('app-shell').style.display = 'none';
+  document.getElementById('login-username').value = '';
+  document.getElementById('login-password').value = '';
+  document.getElementById('patient-insurer-section').style.display = 'none';
+  document.getElementById('results-pane').innerHTML = `<div class="card"><div class="empty-state"><div class="empty-icon">⚕</div><div class="empty-title">No analysis yet</div><div class="empty-sub">Enter a clinical note and click Run Analysis</div></div></div>`;
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+const PAGE_META = {
+  analyze:   ['Analyze Clinical Note',  'Extract ICD-10 & CPT codes with AI assistance'],
+  claims:    ['My Claims',              'View and manage insurance claims addressed to you'],
+  logs:      ['Audit Logs',             'Browse and manage all past audit runs'],
+  stats:     ['Statistics',             'Aggregate insights across all audit cases'],
+  icdsearch: ['ICD-10 Semantic Search', 'Find ICD-10 codes by clinical phrase'],
+  cptlookup: ['CPT Code Lookup',        'Find CPT codes by procedure name'],
+};
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id)?.classList.add('active');
+  document.getElementById('nav-'+id)?.classList.add('active');
+  const [t,s] = PAGE_META[id]||[id,''];
+  document.getElementById('page-title').textContent = t;
+  document.getElementById('page-sub').textContent   = s;
+  if (id==='logs')    loadLogs();
+  if (id==='stats')   loadStats();
+  if (id==='claims')  loadClaims();
+}
+
+// ── FILE UPLOAD ───────────────────────────────────────────────────────────────
+let uploadedFile = null;
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f) processFile(f);
+}
+
+function handleFileSelect(e) {
+  const f = e.target.files[0];
+  if (f) processFile(f);
+}
+
+async function processFile(file) {
+  uploadedFile = file;
+  const icons = { pdf:'📕', doc:'📘', docx:'📘', png:'🖼️', jpg:'🖼️', jpeg:'🖼️', webp:'🖼️' };
+  const ext = file.name.split('.').pop().toLowerCase();
+  const icon = icons[ext]||'📄';
+  const sz = file.size < 1024*1024 ? `${(file.size/1024).toFixed(0)} KB` : `${(file.size/1024/1024).toFixed(1)} MB`;
+
+  document.getElementById('file-preview-area').innerHTML = `
+    <div class="upload-preview">
+      <span class="upload-preview-icon">${icon}</span>
+      <span class="upload-preview-name">${file.name}</span>
+      <span class="upload-preview-size">${sz}</span>
+      <button class="upload-preview-remove" onclick="removeFile()">✕</button>
+    </div>
+    <div class="file-reading-indicator" id="file-reading-ind">
+      <span>⟳</span> Extracting text from document…
+    </div>`;
+
+  // Try to upload to server first, fall back to client-side
+  try {
+    if (authToken) {
+      const fd = new FormData();
+      fd.append('file', file);
+      const headers = { 'Authorization': 'Bearer ' + authToken };
+      
+      console.log('[Upload] Starting upload...');
+      console.log('  authToken length:', authToken.length);
+      console.log('  file:', file.name, file.size, file.type);
+      console.log('  headers:', headers);
+      
+      const res = await fetch(`${API}/upload`, {
+        method:'POST',
+        headers: headers,
+        body: fd
+      });
+      
+      const resText = await res.text();
+      console.log('[Upload Response] Status:', res.status, res.statusText);
+      console.log('[Upload Response] Headers:', Array.from(res.headers.entries()));
+      console.log('[Upload Response] Body (first 300 chars):', resText.slice(0, 300));
+      
+      if (res.ok) {
+        const data = JSON.parse(resText);
+        lastAnalysisResult = data;
+
+        const serverHasText = (data.clinical_note || '').trim().length > 0;
+        const needsClientFallback = data.extraction_method === 'client-side-pending' || !serverHasText;
+
+        if (needsClientFallback) {
+          showToast('Server OCR could not extract text, trying client-side extraction…', 'warn');
+          // proceed to client-side fallback section below
+        } else {
+          document.getElementById('note-input').value = data.clinical_note || '';
+          document.getElementById('ner-method-badge').textContent = `via ${data.extraction_method||'server'} · ${data.char_count||0} chars`;
+          if (data.ai_codes || data.human_codes || data.audit_result) {
+            renderResults(data);
+            document.getElementById('patient-insurer-section').style.display = 'block';
+            syncSendBar();
+            showToast('File analyzed — you can edit codes and re-analyze', 'success');
+          } else {
+            showToast('File extracted successfully', 'success');
+          }
+          document.getElementById('file-reading-ind')?.remove();
+          return;
+        }
+      } else {
+        let errorDetail = resText;
+        try {
+          const errData = JSON.parse(resText);
+          errorDetail = errData.detail || errData.message || resText;
+        } catch(e) {
+          // resText is not JSON
+        }
+        console.error('[Upload Failed]', res.status, errorDetail);
+        showToast(`Upload failed: ${res.status} - ${errorDetail.slice(0, 150)}`, 'error');
+        document.getElementById('file-reading-ind')?.remove();
+        return;
+      }
+    } else {
+      console.warn('[Upload] No authToken, skipping server upload');
+    }
+  } catch(e) {
+    console.error('[Upload Fallback Exception]', e);
+  }
+
+  // Client-side fallback
+  let text = '';
+  try {
+    if (ext === 'pdf') {
+      showToast('Processing PDF with browser-based extraction…', 'info');
+      text = await extractTextFromFileWithClaude(file, 'application/pdf');
+    } else if (['png','jpg','jpeg','webp','bmp','tiff'].includes(ext)) {
+      showToast('Processing image with browser-based OCR (Claude vision)…', 'info');
+      text = await extractTextFromImage(file);
+    } else {
+      text = `[Unable to extract from ${ext} client-side — please run after signing in or paste text manually]`;
+    }
+  } catch(e) {
+    console.error('[ClientExtraction]', e);
+    text = '';
+  }
+  if (text) {
+    document.getElementById('note-input').value = text;
+    showToast('Text extracted from file', 'success');
+  } else {
+    document.getElementById('note-input').value = '';
+    showToast('No text could be extracted from the image; please paste/enter text manually.', 'error');
+  }
+  document.getElementById('file-reading-ind')?.remove();
+}
+
+async function extractTextFromImage(file) {
+  const b64 = await fileToBase64(file);
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model:'claude-sonnet-4-20250514', max_tokens:1000,
+      messages:[{ role:'user', content:[
+        {type:'image',source:{type:'base64',media_type:file.type||'image/jpeg',data:b64}},
+        {type:'text',text:'Extract all text from this medical document or clinical note image. Return only the extracted text, nothing else.'}
+      ]}]
+    })
+  });
+  const data = await resp.json();
+  return data.content?.[0]?.text || '';
+}
+
+async function extractTextFromFileWithClaude(file, mediaType) {
+  const b64 = await fileToBase64(file);
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model:'claude-sonnet-4-20250514', max_tokens:1000,
+      messages:[{ role:'user', content:[
+        {type:'document', source:{type:'base64', media_type:mediaType, data:b64}},
+        {type:'text', text:'Extract the clinical note or medical text from this document. Return only the clinical text content, nothing else.'}
+      ]}]
+    })
+  });
+  const data = await resp.json();
+  return data.content?.[0]?.text || '';
+}
+
+function fileToBase64(file) {
+  return new Promise((res,rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = () => rej(new Error('Read failed'));
+    r.readAsDataURL(file);
+  });
+}
+
+function removeFile() {
+  uploadedFile = null;
+  document.getElementById('file-preview-area').innerHTML = '';
+  document.getElementById('file-input').value = '';
+}
+
+// ── HUMAN CODES ───────────────────────────────────────────────────────────────
+const codes = [];
+
+function addCode() {
+  const type = document.getElementById('new-code-type').value;
+  const val  = document.getElementById('new-code-val').value.trim().toUpperCase();
+  const desc = document.getElementById('new-code-desc').value.trim();
+  if (!val) return;
+  codes.push({type,val,desc});
+  document.getElementById('new-code-val').value = '';
+  document.getElementById('new-code-desc').value = '';
+  document.getElementById('new-code-val').focus();
+  renderCodeList();
+}
+
+function removeCode(i) { codes.splice(i,1); renderCodeList(); }
+
+function renderCodeList() {
+  const el = document.getElementById('code-entry-list');
+  if (!codes.length) { el.innerHTML=''; return; }
+  el.innerHTML = codes.map((c,i)=>`
+    <div class="code-entry-row">
+      <span class="code-type-badge ${c.type==='ICD-10'?'badge-icd':'badge-cpt'}">${c.type}</span>
+      <span class="code-val">${c.val}</span>
+      <span class="code-desc">${c.desc||'<span style="color:var(--muted)">—</span>'}</span>
+      <button class="remove-code" onclick="removeCode(${i})">×</button>
+    </div>`).join('');
+}
+
+function collectCodes() {
+  return codes.map(c => {
+    const e = { description: c.desc||c.val };
+    if (c.type==='ICD-10') e.icd_code=c.val; else e.cpt_code=c.val;
+    return e;
+  });
+}
+
+// ── LOAD EXAMPLE ──────────────────────────────────────────────────────────────
+function loadExample() {
+  document.getElementById('note-input').value =
+    `Patient is a 67-year-old male with SOB and chest pain.\nHistory of HTN and DM2. No history of cancer.\nCT chest and CBC ordered. IV infusion of antibiotics started for CAP.\nNo evidence of PE on CT.`;
+  document.getElementById('pat-name').value      = 'Rajan Kumar';
+  document.getElementById('pat-phone').value     = '+91 98765 43210';
+  document.getElementById('pat-email').value     = 'rajan.kumar@email.com';
+  document.getElementById('pat-insurance').value = 'INS-2024-00456';
+  document.getElementById('pat-dob').value       = '15/03/1957';
+  document.getElementById('pat-gender').value    = 'Male';
+  document.getElementById('pat-address').value   = '45 Anna Nagar, Chennai - 600040';
+  document.getElementById('ins-org').value       = 'Star Health Insurance';
+  document.getElementById('ins-email').value     = 'claims@starhealth.in';
+  document.getElementById('ins-policy').value    = 'POL-2024-78923';
+  document.getElementById('ins-adjuster').value  = 'Meena Iyer';
+  document.getElementById('hosp-name').value     = 'Apollo Hospitals, Chennai';
+  codes.length = 0;
+  [{type:'ICD-10',val:'J18.9',desc:'Pneumonia, unspecified'},{type:'ICD-10',val:'I10',desc:'Essential hypertension'},{type:'CPT',val:'85025',desc:'Blood test'},{type:'ICD-10',val:'Z87.01',desc:'History of pneumonia'}].forEach(c=>codes.push(c));
+  renderCodeList();
+}
+
+function clearAll() {
+  document.getElementById('note-input').value='';
+  codes.length=0; renderCodeList(); removeFile();
+  document.getElementById('results-pane').innerHTML=`<div class="card"><div class="empty-state"><div class="empty-icon">⚕</div><div class="empty-title">No analysis yet</div><div class="empty-sub">Enter a clinical note and click Run Analysis</div></div></div>`;
+  document.getElementById('claim-result-box').style.display='none';
+  lastAnalysisResult=null;
+  
+  // Clear Patient Details
+  document.getElementById('pat-name').value = '';
+  document.getElementById('pat-phone').value = '';
+  document.getElementById('pat-email').value = '';
+  document.getElementById('pat-insurance').value = '';
+  document.getElementById('pat-dob').value = '';
+  document.getElementById('pat-gender').value = '';
+  document.getElementById('pat-address').value = '';
+  
+  // Clear Insurer Details
+  document.getElementById('ins-org').value = '';
+  document.getElementById('ins-email').value = '';
+  document.getElementById('ins-policy').value = '';
+  document.getElementById('ins-adjuster').value = '';
+  document.getElementById('hosp-name').value = '';
+  
+  syncSendBar();
+}
+
+// ── RUN ANALYSIS ──────────────────────────────────────────────────────────────
+async function runAnalysis() {
+  const note = document.getElementById('note-input').value.trim();
+  if (!note) { showToast('Please enter a clinical note','error'); return; }
+  const btn=document.getElementById('run-btn'), sp=document.getElementById('spinner');
+  btn.disabled=true; sp.style.display='block';
+  try {
+    const res = await fetch(`${API}/analyze`, {
+      method:'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ clinical_note:note, human_codes:collectCodes() })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail||'Server error');
+    lastAnalysisResult = data;
+    renderResults(data);
+    document.getElementById('patient-insurer-section').style.display = 'block';
+    document.getElementById('claim-result-box').style.display = 'none';
+    syncSendBar();
+    showToast('Analysis complete!','success');
+    // Scroll to results
+    document.getElementById('results-pane').scrollIntoView({behavior:'smooth',block:'start'});
+  } catch(e) {
+    document.getElementById('results-pane').innerHTML=`<div class="card"><div class="card-body"><div style="color:var(--red);font-weight:600;margin-bottom:6px;font-family:var(--font-head)">Connection error</div><div style="font-size:13px;color:var(--text2)">${e.message}</div><div style="font-size:12px;color:var(--muted);margin-top:8px">Make sure uvicorn is running: <code style="font-family:var(--font-mono);background:var(--surface2);padding:1px 5px;border-radius:4px">uvicorn main:app --reload</code></div></div></div>`;
+  } finally {
+    btn.disabled=false; sp.style.display='none';
+  }
+}
+
+function syncSendBar() {
+  const patEmail = document.getElementById('pat-email').value.trim();
+  const insEmail = document.getElementById('ins-email').value.trim();
+  document.getElementById('send-patient-email-display').textContent = patEmail||'not set';
+  document.getElementById('send-insurer-email-display').textContent = insEmail||'not set';
+}
+
+// Live-update email displays
+['pat-email','ins-email'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', syncSendBar);
+});
+
+// ── RENDER RESULTS ────────────────────────────────────────────────────────────
+function renderResults(data) {
+  const ar=data.audit_result, ai=data.ai_codes||{}, ent=data.entities||{}, mr=data.manual_review||[];
+  const icd=ai.icd_codes||[], cpt=ai.cpt_codes||[], warns=ai.warnings||[];
+
+  const tabs=[
+    {id:'ai',   label:'AI Codes',       count:icd.length+cpt.length},
+    {id:'miss', label:'Missing',         count:ar?.missing_codes?.length||0},
+    {id:'extra',label:'Extra',           count:ar?.extra_codes?.length||0},
+    {id:'explain',label:'Explanations',  count:null},
+    {id:'ent',  label:'Entities',        count:null},
+    {id:'recs', label:'Recommendations', count:ar?.recommendations?.length||0},
+  ];
+
+  let html='';
+  if (ar) {
+    const rk=ar.risk_level||'unknown';
+    html+=`<div class="summary-strip">
+      <div class="sum-card"><div class="sum-val" style="color:#16a34a">${ar.summary?.matched||0}</div><div class="sum-lbl">Matched</div></div>
+      <div class="sum-card"><div class="sum-val" style="color:var(--red)">${ar.summary?.missing_count||0}</div><div class="sum-lbl">Missing</div><div class="sum-sub" style="color:var(--red)">Undercoding risk</div></div>
+      <div class="sum-card"><div class="sum-val" style="color:#d97706">${ar.summary?.extra_count||0}</div><div class="sum-lbl">Extra</div><div class="sum-sub" style="color:#d97706">Upcoding risk</div></div>
+      <div class="sum-card"><span class="risk-badge risk-${rk}" style="margin-bottom:6px">${rk.toUpperCase()}</span><div class="sum-sub" style="color:var(--text2);font-size:12px">Lost: ${ar.revenue_lost_estimate||ar.revenue_risk||'—'}</div><div class="sum-sub" style="color:var(--red);font-size:12px">Penalty: ${ar.penalty_risk_estimate||'—'}</div></div>
+    </div>`;
+    if (data.audit_id) html+=`<div class="audit-id-row" style="margin-bottom:16px">✓ Saved · Audit ID: <strong>${data.audit_id.slice(0,8)}…</strong>&nbsp;&nbsp;<span style="margin-left:auto;color:var(--accent);cursor:pointer;font-size:11px" onclick="downloadServerPDF('${data.audit_id}')">⬇ Download PDF</span></div>`;
+  }
+  warns.forEach(w=>{ html+=`<div class="warn-banner"><span>⚠</span><span>${w}</span></div>`; });
+
+  html+=`<div class="card"><div class="card-body" style="padding-bottom:0;padding-top:0"><div class="tab-bar">`;
+  tabs.forEach((t,i)=>{
+    const c=t.count!==null?`<span class="tab-count">${t.count}</span>`:'';
+    html+=`<button class="tab-btn ${i===0?'active':''}" onclick="switchTab('${t.id}',this)">${t.label}${c}</button>`;
+  });
+  html+=`</div></div><div class="card-body" style="padding-top:4px">`;
+
+  // AI Codes tab
+  html+=`<div class="tab-panel active" id="tp-ai">`;
+  if (icd.length||cpt.length) {
+    if (icd.length) {
+      html+=`<div class="section-lbl">ICD-10 Codes (${icd.length})</div><div class="result-list">`;
+      icd.forEach(c=>{const p=Math.round((c.confidence||0)*100);html+=`<div class="result-row ai"><div class="r-code">${c.icd_code}</div><div><div class="r-desc">${c.description||''}</div><div class="r-meta">${c.term||''}</div></div><div class="r-right"><div class="conf-bar-wrap"><div class="conf-bar" style="width:${p}%"></div></div><div class="conf-val">${p}%</div></div></div>`;});
+      html+=`</div>`;
+    }
+    if (cpt.length) {
+      html+=`<div class="section-lbl" style="margin-top:14px">CPT Codes (${cpt.length})</div><div class="result-list">`;
+      cpt.forEach(c=>{html+=`<div class="result-row ai" style="border-left-color:#7c3aed"><div class="r-code" style="color:#7c3aed">${c.cpt_code}</div><div><div class="r-desc">${c.description||''}</div><div class="r-meta">CPT · conf ${Math.round((c.confidence||0)*100)}%</div></div></div>`;});
+      html+=`</div>`;
+    }
+    if (mr.length) {
+      html+=`<div class="section-lbl" style="margin-top:14px;color:#7c3aed">Manual Review (${mr.length})</div><div class="result-list">`;
+      mr.forEach(c=>{html+=`<div class="result-row" style="border-left-color:#7c3aed;background:var(--purple-bg);border-color:var(--purple-bd)"><div class="r-code" style="color:var(--purple)">${c.icd_code||'?'}</div><div><div class="r-desc">${c.description||''}</div><div class="r-meta">${c.note||''}</div></div></div>`;});
+      html+=`</div>`;
+    }
+  } else {
+    html+=`<div style="color:var(--muted);font-size:13px;padding:12px 0">No confirmed codes generated. Check manual review or verify FAISS index.</div>`;
+  }
+  html+=`</div>`;
+
+  // Missing tab
+  html+=`<div class="tab-panel" id="tp-miss">`;
+  if (ar?.missing_codes?.length) {
+    html+=`<div class="result-list">`;
+    ar.missing_codes.forEach(c=>{html+=`<div class="result-row missing"><div class="r-code">${c.code}</div><div><div class="r-desc">${c.description||''}</div><div class="r-meta">${c.type} · Risk: ${c.risk||''}</div><div class="r-meta" style="margin-top:4px;font-style:italic">${c.explanation||''}</div></div></div>`;});
+    html+=`</div>`;
+  } else html+=`<div style="color:var(--muted);font-size:13px;padding:12px 0">${ar?'No missing codes — great!':'No audit comparison (no human codes entered)'}</div>`;
+  html+=`</div>`;
+
+  // Extra tab
+  html+=`<div class="tab-panel" id="tp-extra">`;
+  if (ar?.extra_codes?.length) {
+    html+=`<div class="result-list">`;
+    ar.extra_codes.forEach(c=>{html+=`<div class="result-row extra"><div class="r-code">${c.code}</div><div><div class="r-desc">${c.description||''}</div><div class="r-meta">${c.type} · Risk: ${c.risk||''}</div><div class="r-meta" style="margin-top:4px;font-style:italic">${c.explanation||''}</div></div></div>`;});
+    html+=`</div>`;
+  } else html+=`<div style="color:var(--muted);font-size:13px;padding:12px 0">${ar?'No extra codes found.':'No audit comparison.'}</div>`;
+  html+=`</div>`;
+
+  // Explanations tab
+  html+=`<div class="tab-panel" id="tp-explain">`;
+  const allExplanations = [];
+  if (ar?.missing_codes?.length) {
+    ar.missing_codes.forEach(c => {
+      if (c.explanation) allExplanations.push({code: c.code, type: 'Missing', explanation: c.explanation});
+    });
+  }
+  if (ar?.extra_codes?.length) {
+    ar.extra_codes.forEach(c => {
+      if (c.explanation) allExplanations.push({code: c.code, type: 'Extra', explanation: c.explanation});
+    });
+  }
+  if (allExplanations.length) {
+    html+=`<div class="result-list">`;
+    allExplanations.forEach(e => {
+      html+=`<div class="result-row" style="border-left-color:var(--blue);background:var(--blue-bg);border-color:var(--blue-bd)"><div class="r-code" style="color:var(--blue)">${e.code}</div><div><div class="r-desc" style="font-weight:500">${e.type}</div><div class="r-meta" style="margin-top:6px; line-height:1.5">${e.explanation}</div></div></div>`;
+    });
+    html+=`</div>`;
+  } else html+=`<div style="color:var(--muted);font-size:13px;padding:12px 0">No explanations available.</div>`;
+  html+=`</div>`;
+
+  // Entities tab
+  html+=`<div class="tab-panel" id="tp-ent">`;
+  [{label:'Diagnoses',items:ent.diagnoses||[],cls:'tag-green'},{label:'Procedures',items:ent.procedures||[],cls:''},{label:'Symptoms',items:ent.symptoms||[],cls:'tag-blue'},{label:'Negated (not coded)',items:ent.negated||[],cls:'tag-red'}].forEach(s=>{
+    if (!s.items.length) return;
+    html+=`<div class="section-lbl">${s.label}</div><div class="tag-cloud" style="margin-bottom:14px">${s.items.map(i=>`<span class="tag ${s.cls}">${i}</span>`).join('')}</div>`;
+  });
+  if (!ent.diagnoses?.length && !ent.procedures?.length && !ent.symptoms?.length)
+    html+=`<div style="color:var(--muted);font-size:13px;padding:12px 0">No entities extracted yet.</div>`;
+  html+=`</div>`;
+
+  // Recs tab
+  html+=`<div class="tab-panel" id="tp-recs">`;
+  if (ar?.recommendations?.length) {
+    html+=`<ul class="rec-list">`;
+    ar.recommendations.forEach(r=>{html+=`<li><span class="rec-arrow">→</span><span>${r}</span></li>`;});
+    html+=`</ul>`;
+  } else html+=`<div style="color:var(--muted);font-size:13px;padding:12px 0">No recommendations.</div>`;
+  html+=`</div>`;
+
+  html+=`</div></div>`;
+  document.getElementById('results-pane').innerHTML=`<div style="animation:fadeUp .25s ease">${html}</div>`;
+}
+
+function switchTab(id,btn) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tp-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── SAVE PATIENT & RAISE CLAIM ────────────────────────────────────────────────
+async function savePatientAndSendReport() {
+  if (!lastAnalysisResult) { showToast('Run an analysis first','error'); return; }
+  if (!authToken) { showToast('You must be signed in','error'); return; }
+  const auditId = lastAnalysisResult.audit_id;
+  if (!auditId) { showToast('No audit ID — re-run the analysis','error'); return; }
+
+  const patName = document.getElementById('pat-name').value.trim();
+  if (!patName) { showToast('Patient name is required','error'); return; }
+
+  const btn = document.getElementById('send-btn'), sp = document.getElementById('send-spinner');
+  btn.disabled=true; sp.style.display='block';
+
+  try {
+    // 1. Save patient
+    const patRes = await fetch(`${API}/patients`, {
+      method:'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({
+        audit_id:       auditId,
+        name:           patName,
+        phone:          document.getElementById('pat-phone').value.trim(),
+        email:          document.getElementById('pat-email').value.trim(),
+        dob:            document.getElementById('pat-dob').value.trim(),
+        gender:         document.getElementById('pat-gender').value,
+        address:        document.getElementById('pat-address').value.trim(),
+        insurance_code: document.getElementById('pat-insurance').value.trim() || document.getElementById('ins-policy').value.trim(),
+        insurance_org:  document.getElementById('ins-org').value.trim(),
+        insurer_email:  document.getElementById('ins-email').value.trim(),
+        hospital_name:  document.getElementById('hosp-name').value.trim(),
+      })
+    });
+    const patData = await patRes.json();
+    if (!patRes.ok) throw new Error(patData.detail || 'Failed to save patient');
+
+    // 2. Raise claim & send emails
+    const claimRes = await fetch(`${API}/claims`, {
+      method:'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ audit_id: auditId, send_emails: true })
+    });
+    const claimData = await claimRes.json();
+    if (!claimRes.ok) throw new Error(claimData.detail || 'Failed to raise claim');
+
+    // Show result
+    const er = claimData.email_results || {};
+    const patSent = er.patient ? (er.patient.sent ? '✅' : '⚠️') : '—';
+    const insSent = er.insurer ? (er.insurer.sent ? '✅' : '⚠️') : '—';
+    const patMsg  = er.patient?.message || '';
+    const insMsg  = er.insurer?.message || '';
+
+    document.getElementById('claim-result-box').style.display='block';
+    document.getElementById('claim-result-box').innerHTML=`
+      <div class="success-box info-box" style="margin-top:0;margin-bottom:16px">
+        <div>
+          <strong>✅ Claim raised successfully!</strong><br>
+          <span style="font-family:var(--font-mono);font-size:11px">Claim ID: ${claimData.claim_id?.slice(0,8)}…</span><br>
+          <span style="font-size:12px;margin-top:4px;display:block">
+            Patient email: ${patSent} ${patMsg}<br>
+            Insurer email: ${insSent} ${insMsg}
+          </span>
+        </div>
+      </div>`;
+    showToast('Claim raised! Emails dispatched.','success');
+
+  } catch(e) {
+    showToast(e.message||'Failed to send report','error');
+  } finally {
+    btn.disabled=false; sp.style.display='none';
+  }
+}
+
+// ── PDF REPORT (client-side jsPDF) ────────────────────────────────────────────
+function downloadReportPDF() {
+  if (!lastAnalysisResult) { showToast('Run an analysis first','error'); return; }
+
+  // Try server PDF first
+  const aid = lastAnalysisResult.audit_id;
+  if (aid && authToken) { downloadServerPDF(aid); return; }
+
+  generateClientPDF();
+}
+
+function downloadServerPDF(auditId) {
+  if (!authToken) { showToast('You must be signed in to download','error'); return; }
+  const url = `${API}/logs/${auditId}/report.pdf`;
+  fetch(url, { headers: authHeaders() })
+    .then(res => {
+      if (!res.ok) throw new Error('Download failed: ' + res.status);
+      return res.blob();
+    })
+    .then(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `audit_${auditId.slice(0,8)}.pdf`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showToast('PDF download started','success');
+    })
+    .catch(e => showToast(e.message || 'Download failed','error'));
+}
+
+function generateClientPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210, margin=18, cw=W-margin*2;
+  let y=20;
+  const accent=[26,71,42], gray=[100,100,100], light=[240,243,241];
+
+
+
+
+
+
+
+
+
+
+
+  doc.setFillColor(...accent);
+  doc.rect(0,0,W,32,'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(18); doc.setFont('helvetica','bold');
+  doc.text('CodePerfect Auditor',margin,14);
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.text('Medical Coding Audit Report',margin,21);
+  doc.text(`Generated: ${new Date().toLocaleString('en-IN')}`,margin,27);
+  if (currentUser) doc.text(`Prepared by: ${currentUser.full_name||currentUser.username} · ${currentUser.organization||''}`,W-margin,27,{align:'right'});
+  y=42;
+
+  function sectionTitle(title) {
+    doc.setFillColor(...light);
+    doc.rect(margin,y-5,cw,10,'F');
+    doc.setTextColor(...accent);
+    doc.setFontSize(10); doc.setFont('helvetica','bold');
+    doc.text(title,margin+3,y+2);
+    y+=12; doc.setTextColor(30,30,30);
+  }
+
+  function row(label,value,indent=0) {
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(...gray);
+    doc.text(label,margin+indent,y);
+    doc.setFont('helvetica','normal'); doc.setTextColor(30,30,30);
+    const lines = doc.splitTextToSize(value||'—', cw-40);
+    doc.text(lines, margin+indent+40, y);
+    y += Math.max(6, lines.length * 5);
+  }
+
+  // Patient
+  const pat={
+    name:     document.getElementById('pat-name').value,
+    phone:    document.getElementById('pat-phone').value,
+    email:    document.getElementById('pat-email').value,
+    insurance:document.getElementById('pat-insurance').value,
+    dob:      document.getElementById('pat-dob').value,
+    gender:   document.getElementById('pat-gender').value,
+    address:  document.getElementById('pat-address').value,
+  };
+  sectionTitle('PATIENT DETAILS');
+  row('Full Name:',pat.name); row('Date of Birth:',pat.dob); row('Gender:',pat.gender);
+  row('Phone:',pat.phone); row('Email:',pat.email);
+  row('Insurance Code:',pat.insurance); row('Address:',pat.address);
+  y+=4;
+
+  // Insurer
+  const ins={
+    org:      document.getElementById('ins-org').value,
+    email:    document.getElementById('ins-email').value,
+    policy:   document.getElementById('ins-policy').value,
+    adjuster: document.getElementById('ins-adjuster').value,
+    hosp:     document.getElementById('hosp-name').value,
+  };
+  sectionTitle('INSURER & FACILITY DETAILS');
+  row('Insurance Org:',ins.org); row('Policy Number:',ins.policy);
+  row('Claims Email:',ins.email); row('Adjuster:',ins.adjuster); row('Facility:',ins.hosp);
+  y+=4;
+
+  // Audit Summary
+  const ar=lastAnalysisResult.audit_result;
+  if (ar) {
+    sectionTitle('AUDIT SUMMARY');
+    const riskColors={high:[185,28,28],medium:[146,64,14],low:[20,83,45],clear:[20,83,45]};
+    const rc=riskColors[ar.risk_level]||[100,100,100];
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(...gray);
+    doc.text('Risk Level:',margin,y);
+    doc.setTextColor(...rc); doc.text((ar.risk_level||'UNKNOWN').toUpperCase(),margin+40,y);
+    doc.setTextColor(30,30,30); doc.setFont('helvetica','normal'); y+=6;
+    row('Matched Codes:',String(ar.summary?.matched||0));
+    row('Missing Codes:',String(ar.summary?.missing_count||0));
+    row('Extra Codes:',String(ar.summary?.extra_count||0));
+    row('Revenue Lost Est.:',ar.revenue_lost_estimate||ar.revenue_risk||'—');
+    row('Total At Risk:',ar.total_at_risk||'—');
+    row('Action Required:',ar.action_required||'—');
+    y+=4;
+  }
+
+  // Clinical Note
+  if (y>230){doc.addPage();y=20;}
+  sectionTitle('CLINICAL NOTE / DOCTOR PRESCRIPTION');
+  const note = document.getElementById('note-input').value.trim();
+  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(60,60,60);
+  const noteLines = doc.splitTextToSize(note.slice(0,800)+(note.length>800?'…':''),cw);
+  doc.text(noteLines,margin,y);
+  y+=noteLines.length*4.5+6;
+
+  // ICD
+  const aiCodes=lastAnalysisResult.ai_codes||{};
+  const icdCodes=aiCodes.icd_codes||[];
+  if (icdCodes.length) {
+    if (y>240){doc.addPage();y=20;}
+    sectionTitle(`AI-GENERATED ICD-10 CODES (${icdCodes.length})`);
+    icdCodes.forEach(c=>{
+      if (y>270){doc.addPage();y=20;}
+      doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(...accent);
+      doc.text(c.icd_code,margin,y);
+      doc.setFont('helvetica','normal'); doc.setTextColor(30,30,30);
+      const dl=doc.splitTextToSize(c.description||'',cw-30);
+      doc.text(dl,margin+22,y);
+      doc.setTextColor(...gray); doc.text(`${Math.round((c.confidence||0)*100)}%`,W-margin,y,{align:'right'});
+      y+=Math.max(6, dl.length*5);
+    });
+    y+=4;
+  }
+
+  // CPT
+  const cptCodes=aiCodes.cpt_codes||[];
+  if (cptCodes.length) {
+    if (y>240){doc.addPage();y=20;}
+    sectionTitle(`AI-GENERATED CPT CODES (${cptCodes.length})`);
+    cptCodes.forEach(c=>{
+      if (y>270){doc.addPage();y=20;}
+      doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(76,29,149);
+      doc.text(c.cpt_code,margin,y);
+      doc.setFont('helvetica','normal'); doc.setTextColor(30,30,30);
+      doc.text(c.description||'',margin+22,y);
+      y+=6;
+    });
+    y+=4;
+  }
+
+  // Missing
+  if (ar?.missing_codes?.length) {
+    if (y>230){doc.addPage();y=20;}
+    sectionTitle(`MISSING CODES — UNDERCODING RISK (${ar.missing_codes.length})`);
+    ar.missing_codes.forEach(c=>{
+      if (y>270){doc.addPage();y=20;}
+      doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(185,28,28);
+      doc.text(c.code,margin,y);
+      doc.setFont('helvetica','normal'); doc.setTextColor(30,30,30);
+      doc.text(`${c.description||''} (${c.type}·${c.risk||''} risk)`,margin+22,y);
+      y+=6;
+    });
+    y+=4;
+  }
+
+  // Extra
+  if (ar?.extra_codes?.length) {
+    if (y>230){doc.addPage();y=20;}
+    sectionTitle(`EXTRA CODES — UPCODING RISK (${ar.extra_codes.length})`);
+    ar.extra_codes.forEach(c=>{
+      if (y>270){doc.addPage();y=20;}
+      doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(146,64,14);
+      doc.text(c.code,margin,y);
+      doc.setFont('helvetica','normal'); doc.setTextColor(30,30,30);
+      doc.text(`${c.description||''} (${c.type}·${c.risk||''} risk)`,margin+22,y);
+      y+=6;
+    });
+    y+=4;
+  }
+
+  // Recommendations
+  if (ar?.recommendations?.length) {
+    if (y>230){doc.addPage();y=20;}
+    sectionTitle('RECOMMENDATIONS');
+    ar.recommendations.forEach(r=>{
+      if (y>270){doc.addPage();y=20;}
+      doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.setTextColor(30,30,30);
+      const lines=doc.splitTextToSize('→ '+r,cw);
+      doc.text(lines,margin,y);
+      y+=lines.length*4.5+2;
+    });
+  }
+
+  // Footer
+  const pageCount=doc.internal.getNumberOfPages();
+  for(let i=1;i<=pageCount;i++){
+    doc.setPage(i);
+    doc.setFillColor(...accent);
+    doc.rect(0,285,W,12,'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(7.5); doc.setFont('helvetica','normal');
+    doc.text('CodePerfect Auditor — Confidential Medical Coding Audit Report',margin,291);
+    doc.text(`Page ${i} of ${pageCount}`,W-margin,291,{align:'right'});
+  }
+
+  const fname=`audit_${pat.name?pat.name.replace(/\s+/g,'_')+'_':''}${new Date().toISOString().slice(0,10)}.pdf`;
+  doc.save(fname);
+  showToast('PDF downloaded!','success');
+}
+
+// ── CLAIMS PAGE (Insurer) ─────────────────────────────────────────────────────
+async function loadClaims() {
+  if (!authToken) return;
+  const tbody = document.getElementById('claims-tbody');
+  if (!tbody) return;
+  const statusFilter = document.getElementById('claim-status-filter')?.value||'';
+  tbody.innerHTML=`<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">Loading…</td></tr>`;
+  try {
+    const res = await fetch(`${API}/claims`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail||'Failed');
+    let claims = data.claims||[];
+    if (statusFilter) claims = claims.filter(c=>c.status===statusFilter);
+    if (!claims.length) {
+      tbody.innerHTML=`<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">No claims found${statusFilter?' for this status':''}.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = claims.map(cl=>{
+      const d = new Date(cl.created_at).toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+      const icd = (cl.icd_codes||[]).slice(0,3).join(', ') + (cl.icd_codes?.length>3?'…':'');
+      const st  = cl.status||'pending';
+      const stCls = `cs-${st}`;
+      return `<tr>
+        <td class="mono-sm">${cl.id?.slice(0,8)}…</td>
+        <td style="font-size:12px;color:var(--text2)">${d}</td>
+        <td style="font-size:13px"><strong>${cl.patient_name||'—'}</strong><div style="font-size:11px;color:var(--muted)">${cl.patient_email||''}</div></td>
+        <td style="font-size:12.5px">${cl.hospital_name||'—'}</td>
+        <td style="font-family:var(--font-mono);font-size:11.5px;color:var(--blue)">${icd||'—'}</td>
+        <td><span class="risk-badge risk-${cl.risk_level||'unknown'}">${(cl.risk_level||'—').toUpperCase()}</span></td>
+        <td style="font-size:12.5px">${cl.total_at_risk||'—'}</td>
+        <td><span class="status-pill ${stCls}">${st.replace(/_/g,' ')}</span></td>
+        <td>
+          <div class="status-update-row">
+            <select id="st-sel-${cl.id}" style="width:auto;padding:4px 6px;font-size:11px">
+              <option value="pending">Pending</option>
+              <option value="requires_verification">Req. Verification</option>
+              <option value="issued">Issued</option>
+              <option value="accepted">Accepted</option>
+              <option value="rejected">Rejected</option>
+            </select>
+            <input type="text" id="st-rem-${cl.id}" placeholder="Remarks…" style="width:120px;padding:4px 6px;font-size:11px">
+            <button class="btn btn-primary btn-sm" style="padding:4px 8px;font-size:11px" onclick="updateClaimStatus('${cl.id}')">✓ Update</button>
+          </div>
+        </td>
+        <td>
+          <button class="btn btn-outline btn-sm" style="padding:4px 9px;font-size:11px" onclick="downloadServerPDF('${cl.audit_id}')">⬇ PDF</button>
+        </td>
+      </tr>`;
+    }).join('');
+    // Pre-select current status
+    claims.forEach(cl=>{
+      const sel=document.getElementById(`st-sel-${cl.id}`);
+      if (sel) sel.value=cl.status||'pending';
+    });
+  } catch(e) {
+    tbody.innerHTML=`<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--red)">Failed to load claims: ${e.message}</td></tr>`;
+  }
+}
+
+async function updateClaimStatus(claimId) {
+  const status  = document.getElementById(`st-sel-${claimId}`)?.value;
+  const remarks = document.getElementById(`st-rem-${claimId}`)?.value.trim();
+  if (!status) return;
+  try {
+    const res = await fetch(`${API}/claims/${claimId}/status`, {
+      method:'PATCH',
+      headers: authHeaders(),
+      body: JSON.stringify({ status, remarks: remarks||'' })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail||'Update failed');
+    showToast(`Claim ${status.replace(/_/g,' ')} · ${data.email?.sent?'Patient notified':'email unavailable'}`, 'success');
+    loadClaims();
+  } catch(e) {
+    showToast(e.message||'Update failed','error');
+  }
+}
+
+// ── AUDIT LOGS ────────────────────────────────────────────────────────────────
+async function loadLogs() {
+  const risk  = document.getElementById('risk-filter').value;
+  const tbody = document.getElementById('log-tbody');
+  tbody.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:36px;color:var(--muted)">Loading…</td></tr>`;
+  try {
+    const res  = await fetch(`${API}/logs?limit=50${risk?'&risk='+risk:''}`, { headers: authHeaders() });
+    const data = await res.json();
+    const logs = data.logs||[];
+    if (!logs.length){
+      tbody.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted)">No audit logs yet. Run an analysis first.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML=logs.map(log=>{
+      const d  = new Date(log.created_at).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+      const st = log.status||'pending';
+      const patName = log.patient_name||'—';
+      return `<tr onclick="openLogDetail('${log.id}')">
+        <td class="mono-sm">${log.id.slice(0,8)}…</td>
+        <td style="color:var(--text2);font-size:12.5px">${d}</td>
+        <td style="font-size:12.5px">${patName}</td>
+        <td><span class="risk-badge risk-${log.risk_level||'unknown'}">${(log.risk_level||'—').toUpperCase()}</span></td>
+        <td style="color:#16a34a;font-weight:600">${log.matched_count}</td>
+        <td style="color:var(--red);font-weight:600">${log.missing_count}</td>
+        <td style="color:#d97706;font-weight:600">${log.extra_count}</td>
+        <td><span class="status-pill status-${st}">${st}</span></td>
+        <td style="display:flex;gap:6px" onclick="event.stopPropagation()">
+          <button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:12px" onclick="openLogDetail('${log.id}')">View →</button>
+          <button class="btn btn-outline btn-sm" style="padding:4px 8px;font-size:12px" onclick="downloadServerPDF('${log.id}')">⬇ PDF</button>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--red)">Failed to connect to API.</td></tr>`;
+  }
+}
+
+async function openLogDetail(id) {
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('modal-title').textContent = 'Audit Detail';
+  document.getElementById('modal-sub').textContent='';
+  document.getElementById('modal-body').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)">Loading…</div>`;
+  try {
+    const res  = await fetch(`${API}/logs/${id}`, { headers: authHeaders() });
+    const data = await res.json();
+    const d    = new Date(data.created_at).toLocaleString();
+    document.getElementById('modal-sub').textContent=`${d} · ${id.slice(0,8)}…`;
+    const cats = {matched:'Matched',missing:'Missing',extra:'Extra',ai_confirmed:'AI Confirmed',manual_review:'Manual Review'};
+    const byCat={};
+    (data.codes||[]).forEach(c=>{if(!byCat[c.category])byCat[c.category]=[];byCat[c.category].push(c);});
+
+    const pat = data.patient||{};
+    let html=`<div class="summary-strip" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px">
+      <div class="sum-card"><div class="sum-val" style="color:#16a34a">${data.matched_count}</div><div class="sum-lbl">Matched</div></div>
+      <div class="sum-card"><div class="sum-val" style="color:var(--red)">${data.missing_count}</div><div class="sum-lbl">Missing</div></div>
+      <div class="sum-card"><div class="sum-val" style="color:#d97706">${data.extra_count}</div><div class="sum-lbl">Extra</div></div>
+    </div>
+    <div class="section-lbl">Risk Level</div>
+    <div style="margin-bottom:14px"><span class="risk-badge risk-${data.risk_level||'unknown'}">${(data.risk_level||'unknown').toUpperCase()}</span></div>`;
+
+    // Patient & Insurer details from DB
+    if (pat.name) {
+      html+=`<div class="section-lbl">Patient &amp; Insurer</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px;font-size:12.5px">
+          <strong style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Patient</strong>
+          <div>${pat.name}</div>
+          <div style="color:var(--muted)">${pat.email||''} · ${pat.phone||''}</div>
+          <div style="color:var(--muted)">DOB: ${pat.dob||'—'} · ${pat.gender||'—'}</div>
+          <div style="color:var(--muted)">Insurance: ${pat.insurance_code||'—'}</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px;font-size:12.5px">
+          <strong style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Insurer</strong>
+          <div>${pat.insurance_org||'—'}</div>
+          <div style="color:var(--muted)">${pat.insurer_email||'—'}</div>
+          <div style="color:var(--muted)">Hospital: ${pat.hospital_name||'—'}</div>
+        </div>
+      </div>`;
+    }
+
+    html+=`<div class="section-lbl">Clinical Note</div>
+    <div style="font-size:13px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 13px;margin-bottom:14px;font-style:italic;color:var(--text2);max-height:90px;overflow-y:auto">${data.clinical_note?.slice(0,500)||''}…</div>
+    <div class="section-lbl">Update Status</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
+      ${['pending','reviewed','approved','disputed'].map(s=>`<button class="btn btn-outline btn-sm" onclick="setLogStatus('${id}','${s}')">${s}</button>`).join('')}
+    </div>
+    <div style="text-align:right;margin-bottom:16px">
+      <button class="btn btn-outline btn-sm" onclick="downloadServerPDF('${id}')">⬇ Download PDF Report</button>
+    </div>
+    <hr class="divider">`;
+
+    Object.entries(cats).forEach(([cat,label])=>{
+      const rows=byCat[cat]; if (!rows?.length) return;
+      const cls=cat==='matched'?'matched':cat==='missing'?'missing':cat==='extra'?'extra':'ai';
+      html+=`<div class="section-lbl">${label} (${rows.length})</div><div class="result-list" style="margin-bottom:14px">`;
+      rows.forEach(c=>{html+=`<div class="result-row ${cls}"><div class="r-code">${c.code}</div><div><div class="r-desc">${c.description||''}</div><div class="r-meta">${c.code_type}</div></div></div>`;});
+      html+=`</div>`;
+    });
+    document.getElementById('modal-body').innerHTML=html;
+  } catch(e){
+    document.getElementById('modal-body').innerHTML=`<div style="color:var(--red)">Failed to load detail: ${e.message}</div>`;
+  }
+}
+
+async function setLogStatus(id,status) {
+  await fetch(`${API}/logs/${id}/status`,{method:'PATCH',headers:authHeaders(),body:JSON.stringify({status})});
+  closeModal(); loadLogs();
+}
+
+function closeModal(){ document.getElementById('overlay').classList.remove('open'); }
+
+// ── STATISTICS ────────────────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const s=await fetch(`${API}/logs/stats`, { headers: authHeaders() }).then(r=>r.json());
+    const rk=s.by_risk_level||{};
+    document.getElementById('stats-pane').innerHTML=`
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-card-val" style="color:var(--accent)">${s.total_audits||0}</div><div class="stat-card-lbl">Total audits run</div></div>
+        <div class="stat-card"><div class="stat-card-val" style="color:#0369a1">${s.audits_last_7_days||0}</div><div class="stat-card-lbl">Last 7 days</div></div>
+        <div class="stat-card"><div class="stat-card-val" style="color:var(--red)">${s.avg_missing_per_audit||0}</div><div class="stat-card-lbl">Avg missing / audit</div></div>
+        <div class="stat-card"><div class="stat-card-val" style="color:#d97706">${s.avg_extra_per_audit||0}</div><div class="stat-card-lbl">Avg extra / audit</div></div>
+        <div class="stat-card"><div class="stat-card-val" style="color:var(--red)">${rk.high||0}</div><div class="stat-card-lbl">High risk cases</div></div>
+        <div class="stat-card"><div class="stat-card-val" style="color:#16a34a">${rk.clear||0}</div><div class="stat-card-lbl">Clean cases</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Most Frequently Missed ICD-10 Codes</span></div>
+        <div class="card-body">
+          ${s.top_missing_codes?.length
+            ? `<div class="result-list">${s.top_missing_codes.map(c=>`<div class="result-row missing"><div class="r-code">${c.code}</div><div><div class="r-desc">${c.description||''}</div></div><div class="r-right"><div class="conf-val">×${c.freq}</div></div></div>`).join('')}</div>`
+            : `<div style="color:var(--muted);font-size:13px">No data yet — run some audits first.</div>`}
+        </div>
+      </div>`;
+  } catch(e){
+    document.getElementById('stats-pane').innerHTML=`<div class="card"><div class="card-body"><div style="color:var(--red)">Could not load statistics. Is the API running?</div></div></div>`;
+  }
+}
+
+// ── ICD / CPT SEARCH ──────────────────────────────────────────────────────────
+async function searchICD() {
+  const q=document.getElementById('icd-query').value.trim();
+  const out=document.getElementById('icd-results');
+  if (!q) return;
+  out.innerHTML=`<div style="color:var(--muted);font-size:13px">Searching…</div>`;
+  try {
+    const res=await fetch(`${API}/codes/icd`,{method:'POST',headers:authHeaders(),body:JSON.stringify({query:q,top_k:5})});
+    const data=await res.json();
+    const results=data.results||[];
+    if (!results.length){out.innerHTML=`<div style="color:var(--muted);font-size:13px">No results found.</div>`;return;}
+    out.innerHTML=`<div class="result-list">${results.map(r=>{const p=Math.round((r.similarity||0)*100);return `<div class="result-row ai"><div class="r-code">${r.icd_code}</div><div><div class="r-desc">${r.description}</div></div><div class="r-right"><div class="conf-bar-wrap"><div class="conf-bar" style="width:${p}%"></div></div><div class="conf-val">${p}%</div></div></div>`;}).join('')}</div>`;
+  } catch(e){out.innerHTML=`<div style="color:var(--red);font-size:13px">Search failed. Check if API is running.</div>`;}
+}
+
+async function lookupCPT() {
+  const q=document.getElementById('cpt-query').value.trim();
+  const out=document.getElementById('cpt-results');
+  if (!q) return;
+  out.innerHTML=`<div style="color:var(--muted);font-size:13px">Looking up…</div>`;
+  try {
+    const res=await fetch(`${API}/codes/cpt`,{method:'POST',headers:authHeaders(),body:JSON.stringify({procedure:q})});
+    const data=await res.json();
+    const r=data.result||{};
+    out.innerHTML=r.cpt_code&&r.cpt_code!=='UNKNOWN'
+      ?`<div class="result-row ai" style="border-left-color:#7c3aed;max-width:480px"><div class="r-code" style="color:#7c3aed">${r.cpt_code}</div><div><div class="r-desc">${r.description||q}</div><div class="r-meta">Source: ${r.source||'builtin'}</div></div></div>`
+      :`<div style="color:var(--muted);font-size:13px">No CPT code found for "${q}".</div>`;
+  } catch(e){out.innerHTML=`<div style="color:var(--red);font-size:13px">Lookup failed.</div>`;}
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function showToast(msg, type='') {
+  const c=document.getElementById('toast-container');
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  t.innerHTML=`<span>${type==='success'?'✓':type==='error'?'✕':'ℹ'}</span><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(6px)';t.style.transition='.25s';setTimeout(()=>t.remove(),250);},3500);
+}
+</script>
+</body>
+</html>
