@@ -94,7 +94,6 @@ rpds-py==0.30.0
 safetensors==0.7.0
 scikit-learn==1.8.0
 scipy==1.17.1
-scispacy==0.6.2
 sentence-transformers==5.2.3
 shellingham==1.5.4
 six==1.17.0
