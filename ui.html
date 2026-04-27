@@ -342,10 +342,14 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:18px 0}
 <div class="auth-screen" id="auth-screen">
   <div class="auth-card">
     <div class="auth-logo">
-      <div class="auth-logo-mark">CP</div>
+
+      <div class="logo-mark">
+  <img src="https://raw.githubusercontent.com/lithish89/CodePerfect-Auditor/main/logo.png" 
+       alt="CodePerfect Logo" style="width:90px; height:70px;">
+</div>
       <div>
-        <div class="auth-logo-text">Code<span>Perfect</span></div>
-        <div style="font-size:11px;color:var(--muted)">Medical Coding Auditor · v7.0</div>
+        <div class="auth-logo-text" style="margin-left:30px;">Code<span>Perfect</span></div>
+        <div style="margin-left:30px;font-size:11px;color:var(--muted)">Medical Coding Auditor</div>
       </div>
     </div>
     <div class="auth-tabs">
@@ -381,13 +385,30 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:18px 0}
         <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
       <button class="auth-btn" id="login-btn" onclick="doLogin()">Sign In</button>
-      <div class="auth-hint">
-        Demo credentials:<br>
-        <code>hospital1</code> / <code>hospital123</code> &nbsp;·&nbsp;
-        <code>insurer1</code> / <code>insurer123</code> &nbsp;·&nbsp;
-        <!-- <code>admin</code> / <code>admin123</code> -->
-      </div>
+
+
+<div style="text-align:center; margin-top:25px; font-size:12px; color:#666;">
+<div style="text-align:center; margin-top:25px; font-size:12px; color:#666;">
+  
+  <div style="margin-top:5px; font-size:15px;">
+    Intelligent Medical Coding & Audit Optimization System
+  </div>
+  
+  <div style="margin-top:5px; font-size:15px;">
+    <b>Developed by Lithish</b>
+  </div>
+</div>
+  
+  <div style="margin-top:5px;">
+    <a href="https://github.com/lithish89" target="_blank">GitHub</a> • 
+    <a href="https://www.linkedin.com/in/lithish-babu-d-a58bb931b/" target="_blank">LinkedIn</a>
+  </div>
+</div>
     </div>
+
+
+
+    
 
     <!-- REGISTER FORM -->
     <div id="auth-register-form" class="auth-form">
@@ -444,9 +465,14 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:18px 0}
 <div class="shell" id="app-shell" style="display:none">
   <aside class="sidebar">
       <div class="logo">
-    <div class="logo-mark">CP</div>
-    <div class="logo-name">Code<span>Perfect</span></div>
-    <div class="logo-tag">Medical Coding Auditor</div>
+<div class="logo-mark">
+  <img src="https://raw.githubusercontent.com/lithish89/CodePerfect-Auditor/main/logo.png" 
+       alt="CodePerfect Logo" style="width:60px; height:50px;">
+</div> 
+<div class="logo-name">
+  Code<span>Perfect</span>
+</div>
+<div class="logo-tag">Medical Coding Auditor</div>
     <div class="user-chip" id="user-chip">
       <div class="user-chip-av" id="user-avatar">CP</div>
       <div class="user-chip-info">
@@ -486,7 +512,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:18px 0}
       </div>
       <div class="topbar-right">
         <span class="ver-chip">127.0.0.1:8000</span>
-        <button class="btn btn-ghost btn-sm" onclick="document.body.classList.toggle('dark-mode')" title="Toggle dark mode">🌗</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.body.classList.toggle('dark-mode')" title="Toggle dark mode">🌗 <br> Theme</button>
       </div>
     </div>
     <div class="content">
@@ -680,7 +706,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:18px 0}
         <!-- Send Report Bar -->
         <div class="send-report-bar" id="send-report-bar">
           <div>
-            <div style="font-family:var(--font-head);font-size:14px;font-weight:700;margin-bottom:4px">📤 Send Audit Report</div>
+            <div style="font-family:var(--font-head);font-size:14px;font-weight:700;margin-bottom:4px">Send Audit Report</div>
             <div style="font-size:12px;color:var(--muted)">Raise insurance claim &amp; dispatch the full report to recipients via the API</div>
           </div>
           <div class="send-targets">
