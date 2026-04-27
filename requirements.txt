@@ -4,3 +4,4 @@ pandas
 numpy
 faiss-cpu
 openpyxl
+python-multipart
