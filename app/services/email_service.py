@@ -26,6 +26,7 @@ from __future__ import annotations
 import os
 import smtplib
 import io
+from dotenv import load_dotenv
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
@@ -33,11 +34,15 @@ from datetime import datetime
 from typing import Optional
 
 # ── Config (from environment variables) ───────────────────────────────────────
+
+load_dotenv()
 SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
-SMTP_USER = os.environ.get("SMTP_USER", "lithishkn248248@gmail.com")       # leave blank for dev mode
-SMTP_PASS = os.environ.get("SMTP_PASS", "fnli llrd jvfr dpxe") 
-SMTP_FROM = os.environ.get("SMTP_FROM", "lithishkn248248@gmail.com")
+EMAIL = os.getenv("EMAIL_USER")
+PASSWORD = os.getenv("EMAIL_PASS")
+SMTP_USER = os.environ.get("SMTP_USER") or EMAIL
+SMTP_PASS = os.environ.get("SMTP_PASS") or PASSWORD
+SMTP_FROM = os.getenv("SMTP_FROM", SMTP_USER or EMAIL)
 
 DEV_MODE  = not SMTP_USER   # True = log emails instead of sending
 
