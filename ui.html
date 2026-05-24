@@ -851,7 +851,133 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:18px 0}
   </div>
 </div>
 
+<!-- First Time Analysis Popup -->
+<div id="welcome-popup" class="welcome-popup-overlay">
+  <div class="welcome-popup-box">
+    
+    <div class="welcome-popup-icon">⚡</div>
 
+    <h2>Quick Note</h2>
+
+    <p>
+      The first analysis may take a little longer while the AI engine initializes.
+    </p>
+
+    <div class="welcome-popup-info">
+      After initialization, all future analyses will complete in just a few seconds.
+    </div>
+
+    <button onclick="closeWelcomePopup()" class="welcome-popup-btn">
+      OK, Got it
+    </button>
+
+  </div>
+</div>
+
+<style>
+.welcome-popup-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.45);
+  backdrop-filter:blur(5px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:99999;
+}
+
+.welcome-popup-box{
+  width:100%;
+  max-width:400px;
+  background:#fff;
+  border-radius:18px;
+  padding:30px 26px;
+  text-align:center;
+  box-shadow:0 10px 35px rgba(0,0,0,0.18);
+  animation:popupFade .25s ease;
+  font-family:'Epilogue',sans-serif;
+}
+
+.welcome-popup-icon{
+  font-size:42px;
+  margin-bottom:14px;
+}
+
+.welcome-popup-box h2{
+  font-size:24px;
+  margin-bottom:12px;
+  color:#1a472a;
+  font-family:'Syne',sans-serif;
+}
+
+.welcome-popup-box p{
+  font-size:14px;
+  color:#555;
+  line-height:1.7;
+}
+
+.welcome-popup-info{
+  margin-top:16px;
+  background:#eef8f1;
+  color:#1a472a;
+  padding:12px;
+  border-radius:10px;
+  font-size:13px;
+  font-weight:500;
+}
+
+.welcome-popup-btn{
+  margin-top:22px;
+  width:100%;
+  border:none;
+  background:#1a472a;
+  color:#fff;
+  padding:12px;
+  border-radius:10px;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.welcome-popup-btn:hover{
+  background:#143d22;
+}
+
+@keyframes popupFade{
+  from{
+    opacity:0;
+    transform:translateY(8px) scale(.97);
+  }
+  to{
+    opacity:1;
+    transform:none;
+  }
+}
+</style>
+
+<script>
+function showWelcomePopup() {
+
+  // Show only once
+  if(localStorage.getItem("analysis_popup_seen")) return;
+
+  document.getElementById("welcome-popup").style.display = "flex";
+}
+
+function closeWelcomePopup() {
+  document.getElementById("welcome-popup").style.display = "none";
+
+  // Remember user already saw popup
+  localStorage.setItem("analysis_popup_seen", "true");
+}
+</script>
+
+
+
+
+
+  
 
 
 
@@ -1032,6 +1158,7 @@ async function doRegister() {
 function enterApp() {
   document.getElementById('auth-screen').classList.add('hidden');
   document.getElementById('app-shell').style.display = 'flex';
+    showWelcomePopup();
   const role = currentUser.role;
   const name = currentUser.full_name || currentUser.username || '—';
   const av = name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
