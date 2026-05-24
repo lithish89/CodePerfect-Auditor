@@ -858,7 +858,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:18px 0}
 <!-- ...Modals, toast JS, main script, autocomplete, enhanced result render function, exactly as in your previous version but now extended... -->
 
 <script>
-const API = 'http://127.0.0.1:8000';
+const API = window.location.origin;
 let currentUser = null;
 let authToken   = null;
 let loginRole   = 'hospital';
